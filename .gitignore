@@ -1,2 +1,6 @@
 /.vscode/*
-__pycache__
+__pycache__/
+test.py 
+sol.csv
+LiveGraph.py 
+solution.py
