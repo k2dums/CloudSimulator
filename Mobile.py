@@ -40,7 +40,9 @@ class Mobile(DeviceNode):
                 downloadRate=int(input("Give the download Rate in Mbps:"))
                 uploadRate=int(input("Give the Upload Rate in Mbps"))
                 batteryCapacity=int(input("Give the battery capacity in MAh:"))
+                self.__batteryCapacity=batteryCapacity
                 powerWatt=self.__wattDuringLoad()
+                
            
         else:
             self.__batteryCapacity=batteryCapacity
@@ -48,7 +50,8 @@ class Mobile(DeviceNode):
             powerWatt=self.__wattDuringLoad()
         super().__init__(processingPower,ram,memory,downloadRate,uploadRate,powerWatt)
 
-       
+    def getBatteryCapcity(self):
+        return self.__batteryCapacity
         
 
 
