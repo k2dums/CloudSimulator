@@ -8,15 +8,17 @@ from DeviceNode import DeviceNode
 class Layer:
     __LAYER_ID=0
     def __init__(self) -> None:
-        self.__clusters=2
-        self.__station=1
-        self.__devicePerCluster=[1,1]
-        self.__connectionMatrix=[[1,1]]
+        # self.__clusters=2
+        # self.__station=1
+        # self.__devicePerCluster=[1,1]
+        # self.__connectionMatrix=[[1,1]]
         self.__layerId=Layer.__LAYER_ID
         Layer.__LAYER_ID+=1
-        # self.inputData()
+        self.inputData()
     
     def inputData(self):
+        print("\n")
+        print(f"Layer-{self.__layerId} Config")
         self.__clusters=int(input("Give the number of Clusters:"))
         self.__station=int(input("Give the number of stations:"))
         self.__devicePerCluster=np.array([])
@@ -28,7 +30,7 @@ class Layer:
         #By default a cluster cannot connect directly to another cluster
         #Here the connection_matrix is simply to find to connection of station to cluster
         self.__connectionMatrix=np.zeros((self.__station,self.__clusters))
-        print("If Connection exist give 1 else 0 \n")
+        print("If Connection exist give 1 else 0")
         for i in range(self.__station):
             for j in range(self.__clusters):
                 print(f'Connection between station {i} and cluster {j}:')
@@ -37,7 +39,6 @@ class Layer:
                     value=int(input("Connection value=:"))
                     if value!=0 and value!=1:
                         print("Error with the connection value try again:")
-                print("\n")
                 self.__connectionMatrix[i][j]=value
 
     def __eachDeviceSpecification(self):
@@ -74,9 +75,13 @@ class Layer:
             for deviceno,n in enumerate(range(int(n_Devices))):
                 print(f"For device {deviceno},Cluster {cluster}")
                 if int(input("Is the device mobile or not.Give 1 for yes,else 0:")) ==1:
-                    specEachDevice_inCluster.append(Mobile().setSpecification(prompt=1))
+                    obj=Mobile()
+                    obj.setSpecification(prompt=1)
+                    specEachDevice_inCluster.append(obj)
                 else:
-                    specEachDevice_inCluster.append(DeviceNode().setSpecification(prompt=1))
+                    obj=DeviceNode()
+                    obj.setSpecification(prompt=1)
+                    specEachDevice_inCluster.append(obj)
             #Appending of specEachDevice_inCluster forms the layer
             self.__deviceSpec_inLayer.append([specEachDevice_inCluster])
 
@@ -91,18 +96,22 @@ class Layer:
             #This variable is used to store the device specification per cluster
             specEachDevice_inCluster=[]
             for n in range(int(n_Devices)):
-                specEachDevice_inCluster.append(DeviceNode().setSpecification())
+                obj=DeviceNode()
+                obj.setSpecification()
+                specEachDevice_inCluster.append(obj)
             #Appending of specEachDevice_inCluster forms the layer
             self.__deviceSpec_inLayer.append([specEachDevice_inCluster])
 
     #This reuqests from user to set standard specification or set each specifcation
     def specificationRequest(self):
+        print("\n")
+        print(f"Layer-{self.__layerId} Device Specifications Config")
         print("Would you like to set standard specification or set each specification")
         print("Type 1 for standard specification ,else user will be setting each specfication:")
         if int(input())==1:
-            self.standardSpecification()
+            self.__standardSpecification()
         else:
-            self.eachDeviceSpecification()
+            self.__eachDeviceSpecification()
 
         
     def printAbstractData(self):
@@ -111,8 +120,40 @@ class Layer:
         print("Device Per Cluster",self.__devicePerCluster)
         print("Connection Matrix:\n",self.__connectionMatrix)
     
-    def printLayerData(self):
-        pass
+    def printLayerSummary(self):
+        print("\n")
+        print(f"Layer-{self.__layerId} Summary".center(100," "))
+        print(f"Device Id".center(20," ")+"|"+f"ProcessingPower".center(20," ")+"|"+f"WattUsage".center(20," ")+"|"+f"Battery".center(20," ")+"|")
+        # for cluster in enself.__deviceSpec_inLayer:
+        #     print("Cluster Value",cluster)
+        #     print("cluster",type(cluster))
+        #     for device in cluster:
+        #         print("Device Value",device)
+        #         print("device",type(device))
+        #         for obj in device:
+        #             print("obj an instance",isinstance(obj,DeviceNode))
+        #             break
+        #         break
+        #     break
+
+        for clusterno,cluster in enumerate(self.__deviceSpec_inLayer):
+            print(f"Cluster-{clusterno}".center(75," "))
+            for devices in cluster:
+                for obj in devices:
+                    id:str=f'{obj.getDeviceId()}'.center(20," ")
+                    pp:str=f'{obj.getProcessingPower()}'.center(20," ")
+                    watt:str=f'{obj.getPowerWatt()}'.center(20," ")
+                    if isinstance(obj,Mobile):
+                        battery=f'{obj.getBatteryCapcity()}'.center(20," ")
+                    else:
+                        battery="None".center(20," ")
+                    print(f"{id}|{pp}|{watt}|{battery}|")
+            
+
+
+
+
+       
 
     
     def getCluster(self):
