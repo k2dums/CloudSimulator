@@ -64,3 +64,27 @@ class DeviceNode:
         print("Resource List:",self.__resourceList)
         print("PowerWatt:",self.__powerWatt)
     
+    def getDeviceId(self):
+        return self.__deviceId
+    def getProcessingPower(self):
+        return self.__processingPower
+    def getInstructionLength(self):
+        return self.__instructionLength
+    def getRam(self):
+        return self.__ram
+    def getMemory(self):
+        return self.__memory
+    def getDownloadRate(self):
+        return self.__downloadRate
+    def getUploadRate(self):
+        return self.__uploadRate
+    def getExecutionStartTime(self):
+        return self.__execStartTime
+    def getFinishTime(self):
+        return self.__finishTime
+    def getResourceList(self):
+        return self.__resourceList
+    def getPowerWatt(self):
+        return self.__powerWatt
+    def getIsStation(self):
+        return self.__isStation
