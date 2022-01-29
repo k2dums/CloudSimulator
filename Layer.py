@@ -1,17 +1,17 @@
 #Layer Connection matrix  is used for the connection between clusters 
+#The LayerId static variable needs to be part of the Network class
 import numpy as np
 from DeviceNode import DeviceNode
 from Mobile import Mobile
 from Station import Station
 class Layer:
-    __LAYER_ID=0
-    def __init__(self) -> None:
+
+    def __init__(self,layerId) -> None:
         # self.__clusters=2
         # self.__station=1
         # self.__devicePerCluster=[1,1]
         # self.__connectionMatrix=[[1,1]]
-        self.__layerId=Layer.__LAYER_ID
-        Layer.__LAYER_ID+=1
+        self.__layerId=layerId
         self.inputData()
     
     def inputData(self):
@@ -73,7 +73,7 @@ class Layer:
                 specEachDevice.append(obj)
             specEachCluster=[specEachDevice,specEachStation]
             self.__deviceSpec_inLayer.append(specEachCluster)
-        print(self.__deviceSpec_inLayer)
+
 
       
 
@@ -83,7 +83,6 @@ class Layer:
     def __standardSpecification(self):
         self.__deviceSpec_inLayer=[]
         for cluster in self.__devicePerCluster:
-            print(f"cluster {cluster}")
             specEachDevice=[]
             specEachStation=[]
             for devices in range(cluster[0]):#devices
@@ -94,7 +93,7 @@ class Layer:
                     specEachStation.append(obj)
             specEachCluster=[specEachDevice,specEachStation]
             self.__deviceSpec_inLayer.append(specEachCluster)
-        print(self.__deviceSpec_inLayer)
+
 
     #This reuqests from user to set standard specification or set each specifcation
     def specificationRequest(self):
@@ -186,7 +185,3 @@ class Layer:
         #Need to check the shape of matrix if station and cluster =2,3 but valueMatrix shape=3,3
         self.__connectionMatrix=valueMatrix
     
-
-layer=Layer()
-layer.specificationRequest()
-layer.printLayerSummary()
