@@ -117,18 +117,6 @@ class Layer:
         print("\n")
         print(f"Layer-{self.__layerId} Summary".center(100," "))
         print(f"Device Id".center(20," ")+"|"+f"Processing Power".center(20," ")+"|"+f"WattUsage".center(20," ")+"|"+f"Battery".center(20," ")+"|"+f"Type".center(20," "))
-        # for cluster in enself.__deviceSpec_inLayer:
-        #     print("Cluster Value",cluster)
-        #     print("cluster",type(cluster))
-        #     for device in cluster:
-        #         print("Device Value",device)
-        #         print("device",type(device))
-        #         for obj in device:
-        #             print("obj an instance",isinstance(obj,DeviceNode))
-        #             break
-        #         break
-        #     break
-
         for clusterno,cluster in enumerate(self.__deviceSpec_inLayer):
             print(f"Cluster-{clusterno}".center(75," "))
             for devices in cluster:
