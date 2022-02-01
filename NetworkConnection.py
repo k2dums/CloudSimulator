@@ -39,5 +39,5 @@ class NetworkConnection:
         return self.__start
     def getTo(self)->None:
         return self.__end
-    def getNetworkConenction(self):
+    def getNetworkConnection(self):
         return self.__connection
