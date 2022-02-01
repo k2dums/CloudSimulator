@@ -7,12 +7,11 @@ from Station import Station
 class Layer:
 
     def __init__(self,layerId) -> None:
-        # self.__clusters=2
-        # self.__station=1
-        # self.__devicePerCluster=[1,1]
+        self.__clusters=2
+        self.__devicePerCluster=[[2,2],[2,1]]
         # self.__connectionMatrix=[[1,1]]
         self.__layerId=layerId
-        self.inputData()
+        # self.inputData()
     
     def inputData(self):
         print("\n")
@@ -44,8 +43,7 @@ class Layer:
         # print(self.__devicePerCluster)
 
 
-    #Overall DataStructure  for an entity in self.__deviceSpec_inLayer
-     # [   [ [device] [station]  ]        ]
+
     def __eachDeviceSpecification(self):
         #This is a list containing the devices specifications for each cluster
         self.__deviceSpec_inLayer=[]
