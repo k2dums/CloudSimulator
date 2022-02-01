@@ -17,4 +17,23 @@
 -	[ ] Probability of device shutting down  
 -	[ ] Reallocation of the resources to another device in cluster or to a next cluster
 -	[ ] Calculating the latency(Bandwidth between the layers, clusters, devices)
+## Datastructures used in various classes
+##### Layer class in Layer.py
+self.__deviceSpec_inLayer is a list in function __eachDeviceSpecfication()
+Overall DataStructure  for an cluster entity in self.__deviceSpec_inLayer:
+[   [ [devices,stations]  ]        ]
+For two cluster in the self.__deviceSpec_inLayer:
+[  [devices,stations ]  ,   [devices,stations ]   ]
+[   ____cluster1______  ,   ____cluster2_______   ]
 
+##### Network class in Network.py
+self.__connectionMatrix in makeLayerConnections()
+Overall DataStructure for self.__connectionMatrix
+[ [layer0],[layer1]...[layern] ]
+for layer 0
+[ [NC_Layer0 NC_layer1 NC_Layer2  ]]  NC is NetworkConnection Obj
+Therefore a layer entity in self.__connectionMatrix
+[ [NC_Layeri  NC_Layer(i+1) NC_Layer(i+2] ]
+Therefore two layer in self.__connectionMatrix
+[ [NC_layer NC_Layer NC_Layer]  , [NC_layer NC_Layer NC_layer] ]
+[ ________Layer1_____________   , _________Layer2_____________ ]      
