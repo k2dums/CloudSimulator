@@ -38,13 +38,25 @@ class Network:
     def makeLayerConnections(self):
         print(f"\nConnection Specification for the Network {self.__networkId}")
         #This is for the connection between the cluster layer of a layer to the cluster layer of another layer
-        self.__connectionMatrix=np.zeros((self.getNumberofLayers,self.getNumberofLayers,1))
+        self.__connectionMatrix=[]
         for layerA in range(len(self.__networkLayers)):
-            for LayerB in range(layerA+1,len(self.__networkLayers)):
-                if layerA==LayerB:
-                    continue
-                connection=NetworkConnection(layerA,LayerB,self.__networkLayers[layerA,self.__networkLayers[LayerB]])
-                self.__connectionMatrix[layerA][LayerB][1]=connection
+            layerconnection=[]
+            for layerB in range(layerA+1):
+                if layerA==layerB:
+                    layerconnection.append(0)
+                else:
+                    layerconnection.append(-1)
+
+            for layerB in range(layerA+1,len(self.__networkLayers)):
+                if layerA==layerB-1:#This only allows a layer connection with the very  next layer
+                    connection=NetworkConnection(layerA,layerB,self.__networkLayers[layerA],self.__networkLayers[layerB])
+                else :
+                    connection=0
+                layerconnection.append(connection)
+            self.__connectionMatrix.append(layerconnection)
+
+
+
 
 
 
@@ -55,22 +67,22 @@ class Network:
     
     def getLayerId(self)->int:
         return self.__layerId
-    
     def __updateLayerId(self)->None:
         self.__layerId+=1
-
-    def getnetworkLayers(self):
+    def getNetworkLayers(self):
         return self.__networkLayers
     def getconnectionMatrix(self):
         return self.__connectionMatrix
-    def getNumberofLayers(self):
+    def getNumberofLayers(self)->int:
         return len(self.__networkLayers)
-        
-network=Network()
-network.createLayer()
-network.createLayer()
-network.makeLayerConnections()
-print(network.getconnectionMatrix())
+
+if __name__=="__main__":
+      network=Network()
+      network.createLayer()
+      network.createLayer()
+      network.createLayer()
+      network.makeLayerConnections()
+      print(network.getconnectionMatrix())
 
         
 
