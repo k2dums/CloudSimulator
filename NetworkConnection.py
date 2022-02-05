@@ -28,7 +28,7 @@ class NetworkConnection:
                 if userInput=='y':
                     self.__connection[clusterA][clusterB]=1
                 elif userInput=='n':
-                    self.__connection[clusterA][clusterB]=1
+                    self.__connection[clusterA][clusterB]=0
                 
                 
                 
