@@ -9,9 +9,9 @@ class Layer:
     def __init__(self,layerId) -> None:
         self.__clusters=2
         self.__devicePerCluster=[[2,2],[2,1]]
-        # self.__connectionMatrix=[[1,1]]
+        # self.__connectionMatrix=[[0,1],[1,0]]
         self.__layerId=layerId
-        # self.inputData()
+        self.inputData()
     
     def inputData(self):
         print("\n")
@@ -23,24 +23,28 @@ class Layer:
             devices=int(input(f"For Cluster {i} give the number of devices:"))
             stations=int(input(f"For Cluster {i} give the number of stations:"))
             self.__devicePerCluster.append([devices,stations])
+        self.__devicePerCluster=np.array(self.__devicePerCluster)
 
+    def makeClusterConnection(self):
         #Now we need connection ,see if they are connected
         #Here the connection_matrix is simply to find to connection of clsuter to cluster
-        # self.__connectionMatrix=np.zeros((self.__clusters,self.__clusters))
-        # print("If Connection exist give 1 else 0")
-        # for i in range(self.__clusters):
-        #     for j in range(self.__clusters):
-        #         if i==j:
-        #             continue
-        #         print(f'Connection between cluster {i} and cluster {j}:')
-        #         value=-1
-        #         while value!=0 and value!=1 :
-        #             value=int(input("Connection value=:"))
-        #             if value!=0 and value!=1:
-        #                 print("Error with the connection value try again:")
-        #         self.__connectionMatrix[i][j]=value
-        # self.__devicePerCluster=np.array(self.__devicePerCluster)
-        # print(self.__devicePerCluster)
+        self.__connectionMatrix=np.zeros((self.__clusters,self.__clusters))
+        print("If Connection exist give 1 else 0")
+        for i in range(self.__clusters):
+            for j in range(i+1):
+                if i==j:
+                    continue
+                else:
+                    self.__connectionMatrix[i][j]=-1
+            for j in range(i+1,self.__clusters):
+                print(f'Connection between cluster {i} and cluster {j}:')
+                value=-1
+                while value!=0 and value!=1 :
+                    value=int(input("Connection value=:"))
+                    if value!=0 and value!=1:
+                        print("Error with the connection value try again:")
+            self.__connectionMatrix[i][j]=value
+ 
 
 
 
@@ -98,10 +102,16 @@ class Layer:
         print("\n")
         print(f"Layer-{self.__layerId} Device Specifications Config")
         print("Would you like to set standard specification or set each specification")
-        print("Type 1 for standard specification ,else user will be setting each specfication:")
-        if int(input())==1:
+        print("Type 1 for standard specification ,else 0 and user will be setting each specfication:")
+
+        userInput=-1
+        while (not(userInput==1) and not(userInput==0)):
+            userInput=int(input())
+            if(not(userInput==1) and not(userInput==0)):
+                print("Give valid value")
+        if userInput==1:
             self.__standardSpecification()
-        else:
+        elif userInput==0:
             self.__eachDeviceSpecification()
 
         
