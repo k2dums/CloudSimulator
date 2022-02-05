@@ -54,6 +54,17 @@ class Network:
                     connection=0
                 layerconnection.append(connection)
             self.__connectionMatrix.append(layerconnection)
+    
+    def makeClusterConnectioninLayer(self):
+        layers=network.getNetworkLayers()
+        userInput=input("Give the layers which you like to make cluster connection within its layer (seperate with ,) ")
+        userInput=userInput.split(",")
+        for layerno in userInput:
+            layer=layers[layerno]
+            assert isinstance(layer,Layer)
+            layer.makeClusterConnection()
+        
+
 
 
 
@@ -71,10 +82,12 @@ class Network:
         self.__layerId+=1
     def getNetworkLayers(self):
         return self.__networkLayers
-    def getconnectionMatrix(self):
+    def getConnectionMatrix(self):
         return self.__connectionMatrix
     def getNumberofLayers(self)->int:
         return len(self.__networkLayers)
+    def getNewtworkId(self)->int:
+        return self.__networkId
 
 if __name__=="__main__":
       network=Network()
