@@ -17,24 +17,29 @@ class Network:
         self.__layerId=0
         Network.__NETWORK_ID+=1
     
+    #This creates a network object put inside  list to keep a track of the layers in a network
     def createLayer(self):
-        layer=Layer(self.getLayerId())
+        layer=Layer(self.__getLayerId())
         self.__updateLayerId()
         layer.specificationRequest()
         self.__networkLayers=np.append(self.__networkLayers,layer)
     
+    #This prints the all layer in a network and its  summary including the clusters and its devices 
     def printAllLayerSummary(self):
         print(f"All Layer Summary-Network {self.__networkId}".center(100," "))
         for layer in self.__networkLayers:
             assert isinstance(layer,Layer)
             layer.printLayerSummary()
-    
+
+    #This prints the layer summary of a particular network 
     def printLayerSummary(self,n=0):
         for i,layer in enumerate(self.__networkLayers):
             if i ==n:
                 assert isinstance(layer,Layer)
                 layer.printLayerSummary()
     
+    #Sets the connection between layers in a network
+    #Connection are allowed only between adjacent layer
     def makeLayerConnections(self):
         print(f"\nConnection Specification for the Network {self.__networkId}")
         #This is for the connection between the cluster layer of a layer to the cluster layer of another layer
@@ -55,6 +60,7 @@ class Network:
                 layerconnection.append(connection)
             self.__connectionMatrix.append(layerconnection)
     
+    #Creates cluster connection between a particular layer
     def makeClusterConnectioninLayer(self):
         layers=network.getNetworkLayers()
         userInput=input("Give the layers which you like to make cluster connection within its layer (seperate with ,) ")
@@ -76,7 +82,7 @@ class Network:
 
 
     
-    def getLayerId(self)->int:
+    def __getLayerId(self)->int:
         return self.__layerId
     def __updateLayerId(self)->None:
         self.__layerId+=1
