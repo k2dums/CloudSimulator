@@ -13,6 +13,7 @@ class Layer:
         self.__layerId=layerId
         self.inputData()
     
+    #This is  for  getting  inital input for the number of cluster,devices and stations
     def inputData(self):
         print("\n")
         print(f"Layer-{self.__layerId} Config")
@@ -25,6 +26,7 @@ class Layer:
             self.__devicePerCluster.append([devices,stations])
         self.__devicePerCluster=np.array(self.__devicePerCluster)
 
+    #This is sets the connection for the clusters within a particular layer
     def makeClusterConnection(self):
         #Now we need connection ,see if they are connected
         #Here the connection_matrix is simply to find to connection of clsuter to cluster
@@ -47,7 +49,7 @@ class Layer:
  
 
 
-
+    #This is setting the specification for mobile,station,device etc
     def __eachDeviceSpecification(self):
         #This is a list containing the devices specifications for each cluster
         self.__deviceSpec_inLayer=[]
@@ -78,7 +80,7 @@ class Layer:
 
 
       
-
+    #This sets the standard specification for the object created of DeviceNode class
     #We will add standard specification for the devices and station
     #More info can be seen from eachDeviceSpecification()
     #All the devices here are assumed to be non-mobile
@@ -97,7 +99,7 @@ class Layer:
             self.__deviceSpec_inLayer.append(specEachCluster)
 
 
-    #This reuqests from user to set standard specification or set each specifcation
+    #This requests from user to set standard specification or set each specifcation
     def specificationRequest(self):
         print("\n")
         print(f"Layer-{self.__layerId} Device Specifications Config")
@@ -114,13 +116,14 @@ class Layer:
         elif userInput==0:
             self.__eachDeviceSpecification()
 
-        
+    #Was used for debugging to print the layer charactersitics
     def printAbstractData(self):
         print("Station:",self.__station)
         print("Clusters",self.__clusters)
         print("Device Per Cluster",self.__devicePerCluster)
         print("Connection Matrix:\n",self.__connectionMatrix)
     
+    #Prints the summary details of all the device in a particular layer
     def printLayerSummary(self):
         print("\n")
         print(f"Layer-{self.__layerId} Summary".center(100," "))
@@ -148,9 +151,7 @@ class Layer:
 
 
 
-       
-
-    
+    #The setter and getter for the attributes of the Layer class
     def getCluster(self):
         return self.__clusters
 
@@ -180,4 +181,8 @@ class Layer:
     def setConnectionMatrix(self,valueMatrix):
         #Need to check the shape of matrix if station and cluster =2,3 but valueMatrix shape=3,3
         self.__connectionMatrix=valueMatrix
+    def getdeviceSpec_inLayer(self):
+        return self.__deviceSpec_inLayer
     
+    def getLayerid(self):
+        return self.__layerId
