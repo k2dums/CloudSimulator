@@ -1,8 +1,5 @@
+#This class is modelled to have a generalized feature of a device 
 from typing import Final
-
-from sympy import memoize_property
-
-
 class DeviceNode:
     __DEVICEID=1
     CREATED:Final[int]=0
@@ -36,13 +33,15 @@ class DeviceNode:
         self.__resourceList:list=[]
         #the usage of the device
         self.__powerWatt:int=powerWatt
-        #whether the device is station or not
+        #the status of the device
+        self.__status:int=DeviceNode.CREATED
     
-    
+    #This sets the device id for the devices, which can help to identify the device uniquely
     def __setDeviceId() ->int:
         DeviceNode.__DEVICEID +=1
         return (DeviceNode.__DEVICEID-1)
     
+    #This puts in the device specification such as processing power, ram, memory ,bandwidth etc
     def setSpecification(self,processingPower=2000,ram=4,memory=500,downloadRate=100,uploadRate=100,powerWatt=-1):
         processingPower=int(input("Give the processing power in MIPs:"))
         if( int(input("Would you like to give more details for the device ,1 for yes else 0:"))==1 ):
@@ -58,7 +57,7 @@ class DeviceNode:
         self.__setUploadRate(uploadRate)
         self.__setPowerWatt(powerWatt)
 
-        
+    #Was used for debugging for the class to print the device specification set
     def getConfig(self)->None:
         print("Device id =",self.getDeviceId())
         print("Processing Power:",self.getProcessingPower())
@@ -70,6 +69,9 @@ class DeviceNode:
         print("Resource List:",self.getResourceList())
         print("PowerWatt:",self.getPowerWatt())
     
+
+
+    #This are the setters and getters for the  respective attribute of the instance of the class
     def getDeviceId(self):
         return self.__deviceId
     def getProcessingPower(self):
@@ -88,12 +90,12 @@ class DeviceNode:
         return self.__execStartTime
     def getFinishTime(self):
         return self.__finishTime
-    def getResourceList(self):
+    def getResourceList(self)->list:
         return self.__resourceList
     def getPowerWatt(self):
         return self.__powerWatt
-
-   
+    def getStatus(self):
+        return self.__status
     def __setProcessingPower(self,pp:int):
         self.__processingPower=pp
     def __setInstructionLength(self,il):
@@ -110,8 +112,11 @@ class DeviceNode:
         self.__execStartTime=est
     def __setFinishTime(self,ft):
         self.__finishTime=ft
-    def __setResourceList(self,rl):
-        self.__resourceList=rl
+    def setResourceList(self,rl):
+        self.__resourceList.append(rl)
+        self.__status=DeviceNode.READY
     def __setPowerWatt(self,pw:float):
         self.__powerWatt=pw
+    def setStatus(self,status):
+        self.__status=status
 
