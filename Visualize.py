@@ -13,6 +13,8 @@ class Visualize:
         fig=plt.figure()
         ax1=fig.add_subplot(1,1,1)
 
+    #Plots a particular layer with its clusterss
+    #This shows the cluster connection within the layer if any
     def visualizeLayer(self,network,layerNo)->None:
         #First I need to get the layer
         assert isinstance(network,Network)
@@ -72,7 +74,8 @@ class Visualize:
         plt.show()
 
 
-
+    #Plots the overall network with all the layer and its respective cluster
+    #Omits the cluster connection within a layer
     def visualizeNetwork(self,network)->None:
         assert isinstance(network,Network)
         layers=network.getNetworkLayers()
@@ -130,7 +133,7 @@ class Visualize:
                 NC_obj=layerA[layerNext]#We get the network connection for a layer and the next layer (this tells us which clusters are to be connected)
                 assert isinstance(NC_obj,NetworkConnection)
                 NC_connection=NC_obj.getNetworkConnection()#This returns a  conncetion matrix of the layer clusters and the layerNext clusters
-                print(f"Setting up connection between Layer{NC_obj.getFrom()}  and Layer {NC_obj.getTo()}")
+                # print(f"Setting up connection between Layer{NC_obj.getFrom()}  and Layer {NC_obj.getTo()}")
                 for clusterA_no,clusterA in enumerate(NC_connection):
                     for clusterB_no,clusterB in enumerate(clusterA):
                         if NC_connection[clusterA_no][clusterB_no]==1:#if connection status between clusters of differnt layers =1 plot line
