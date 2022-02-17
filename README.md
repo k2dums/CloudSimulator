@@ -13,7 +13,7 @@
 -	[x] Testing the addition of multiple layer and their connection
 -	[x] Plotting the Whole Network
 -	[ ] Shutting down of device when battery down
--	[ ] Allocation of a resource to a  device in a cluster or the whole cluster
+-	[x] Allocation of a resource to a  device in a cluster or the whole cluster
 -	[ ] Calculating the time taken for the processing by the cluster
 -	[ ] Probability of device shutting down  
 -	[ ] Reallocation of the resources to another device in cluster or to a next cluster
