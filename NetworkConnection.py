@@ -1,3 +1,7 @@
+#This class is reponsible to keep a track of the cluster
+#which is connected to another cluster in another layer
+#Since a layer can have mulitple clusters ,therefore need to track
+#which cluster is connecting to which cluster between two layers
 from Layer import Layer
 import numpy as np
 class NetworkConnection:
@@ -12,7 +16,7 @@ class NetworkConnection:
         self.__connection=np.zeros((self.__layerA_clusters,self.__layerB_clusters))
         self.makeConnection()
    
-    #this function makes the connection between clusters of two layers
+    #this function makes the connection between clusters of two layers(adjacent)
     def makeConnection(self):
         print(f"\nSetting up connection betweene Layer {self.__start} and Layer {self.__end}")
         print("[y] for Connection else [n]")                  
@@ -34,10 +38,10 @@ class NetworkConnection:
                 
         
     
-    
-    def getFrom(self)->None:
+    #Setters and getters for the NetworkConnection Class
+    def getFrom(self)->None:#Gets the id  of starting  layer
         return self.__start
-    def getTo(self)->None:
+    def getTo(self)->None:#Gets the id of  next layer
         return self.__end
-    def getNetworkConnection(self):
+    def getNetworkConnection(self):#Returns the connection matrix between two layers 
         return self.__connection
