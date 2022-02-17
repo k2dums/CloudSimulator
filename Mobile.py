@@ -1,3 +1,4 @@
+#This class is modelled to have a battery within the device and its needed behaviours
 from typing import Final
 from DeviceNode import DeviceNode
 
@@ -26,7 +27,7 @@ class Mobile(DeviceNode):
         return (self.__batteryCapacity/100)* Mobile.__NOM_VOLTAGE
     
    
-    
+   #This sets the specification for the instnace of the mobile object (has extra battery parameter) 
     def setSpecification(self,processingPower=2000,ram=4,memory=500,downloadRate=100,uploadRate=100,batteryCapacity=4000)->None:
         powerWatt=self.__wattDuringLoad
         processingPower=int(input("Give the processing power in MIPs:"))
@@ -45,6 +46,9 @@ class Mobile(DeviceNode):
         self.__setPowerWatt(powerWatt)
         self.__setBatteryCapacity(batteryCapacity)
 
+
+
+    #Setter and getters for the Mobile class attributes
     def getBatteryCapcity(self):
         return self.__batteryCapacity
     def getBatteryEnergy(self):
