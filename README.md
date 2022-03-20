@@ -14,21 +14,13 @@
 -	[x] Plotting the Whole Network
 -	[ ] Shutting down of device when battery down
 -	[x] Allocation of a resource to a  device in a cluster or the whole cluster
--	[ ] Calculating the time taken for the processing by the cluster
+-	[x] Calculating the time taken for the processing by the cluster
 -	[ ] Probability of device shutting down  
 -	[ ] Reallocation of the resources to another device in cluster or to a next cluster
 -	[ ] Calculating the latency(Bandwidth between the layers, clusters, devices)
 
 ## Datastructures used in various Classes
-##### Layer class in Layer.py
-<pre>
-self.__deviceSpec_inLayer is a list in function __eachDeviceSpecfication()
-Overall DataStructure  for an cluster entity in self.__deviceSpec_inLayer:
-[      [   [devices,stations]   ]     ]
-For two cluster in the self.__deviceSpec_inLayer:
-[  [devices,stations ]  ,  [devices,stations ]   ]
-[  ____cluster1______   ,  _____cluster2_____    ]
-</pre>
+
 
 ##### Network class in Network.py
 <pre>
@@ -44,16 +36,6 @@ Therefore two layer in self.__connectionMatrix
 [ ________Layer1_____________   , _________Layer2_____________ ]    
 </pre>
 
-##### Visualize class in Visualize.py
-<pre>
-centriodList_perLayer in visualizeNetwork()
-[   [   ['C1x','C1y']   ,  ['C2x','C2y']    ] , [     ['C1x','C1y']     ] 
-        --cluster1--    ,  --cluster2--       ,        --cluster1--
-    --------LAYER 1-------------------------- , --------LAYER2-----------
-
-here C1x means cluster 1 x-position value,C1y=cluster1 y-position
-simiarly for C2x means cluster2 x-position
-</pre>
 
 ##### NetworkConnection class in NetworkConnection.py
 <pre>
