@@ -170,9 +170,9 @@ class Broker:
 
             
 
-    # def resourceAllocationAlgorithm (self,algorithm=1):
-    #     self.__algo=Algorithm(self.__network,self)
-    #     self.__algo.resourceAllocation(algorithm)
+    def resourceAllocationAlgorithm (self,algorithm=1):
+        self.__algo=Algorithm(self.__network,self)
+        self.__algo.resourceAllocation(algorithm)
     
     # def loadbalancing(self,algorithm):
     #     if not(hasattr(self,"_Broker__algorithm")):
