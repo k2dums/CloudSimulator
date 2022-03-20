@@ -35,6 +35,8 @@ class DeviceNode:
         self.__powerWatt:int=powerWatt
         #the status of the device
         self.__status:int=DeviceNode.CREATED
+        #Need for the number of processors 
+        #self.__processors:int=processors
     
     #This sets the device id for the devices, which can help to identify the device uniquely
     def __setDeviceId() ->int:
@@ -44,7 +46,11 @@ class DeviceNode:
     #This puts in the device specification such as processing power, ram, memory ,bandwidth etc
     def setSpecification(self,processingPower=2000,ram=4,memory=500,downloadRate=100,uploadRate=100,powerWatt=-1):
         processingPower=int(input("Give the processing power in MIPs:"))
-        if( int(input("Would you like to give more details for the device ,1 for yes else 0:"))==1 ):
+        user=input("Would you like to give more details for the device ,'y' for yes else 'n': ").lower()
+        while user !='y' and user !='n':
+            print("Error:Invalid User Input")
+            user=input("Would you like to give more details for the device ,'y' for yes else 'n': ").lower()
+        if( user =='y' ):
             ram=int(input("Give the RAM size in GB:"))
             memory=int(input("Give the Memory space in GB:"))
             downloadRate=int(input("Give the download Rate in Mbps:"))
