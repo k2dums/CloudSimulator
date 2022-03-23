@@ -1,0 +1,14 @@
+/.vscode/*
+__pycache__/
+test.py 
+sol.csv
+LiveGraph.py 
+solution.py
+DataCenter.py
+Host.py
+Algorithm.py
+Vm.py
+graph.py
+ReadJson.py
+ResourceUtilization.py
+Visualize.py
