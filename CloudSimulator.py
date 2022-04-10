@@ -17,11 +17,11 @@ if __name__ == "__main__":
     
     network=Network()
     network.createAndLayerSpecs()
-
     broker=Broker(network)
     broker.setResourceList(task)
-    broker.resourceAllocationAlgorithm(Algorithm._RoundRobin)
+    broker.resourceAllocationAlgorithm(Algorithm._WeightedRoundRobin)
     broker.AllDeviceStateSummary()
+    broker.printWeightNetwork()
     broker.printUtilizationPerLayerPerCluster()
     
     print("\n\n")
