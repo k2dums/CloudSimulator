@@ -31,19 +31,23 @@ class Mobile(DeviceNode):
     def setSpecification(self,processingPower=2000,ram=4,memory=500,downloadRate=100,uploadRate=100,batteryCapacity=4000)->None:
         powerWatt=self.__wattDuringLoad
         processingPower=int(input("Give the processing power in MIPs:"))
-        if( int(input("Would you like to give more details for the device ,1 for yes else 0:"))==1 ):
+        user=input("Would you like to give more details for the device ,'y' for yes else 'n': ").lower()
+        while user !='y' and user !='n':
+            print("Error:Invalid User Input")
+            user=input("Would you like to give more details for the device ,'y' for yes else 'n': ").lower()
+        if(user=='y'):
             ram=int(input("Give the RAM size in GB:"))
             memory=int(input("Give the Memory space in GB:"))
             downloadRate=int(input("Give the download Rate in Mbps:"))
             uploadRate=int(input("Give the Upload Rate in Mbps"))
             batteryCapacity=int(input("Give the battery capacity in MAh:"))
             powerWatt=self.__wattDuringLoad()
-        self.__setProcessingPower(processingPower)
-        self.__setRam(ram)
-        self.__setMemory(memory)
-        self.__setDownloadRate(downloadRate)
-        self.__setUploadRate(uploadRate)
-        self.__setPowerWatt(powerWatt)
+        self._DeviceNode__setProcessingPower(processingPower)
+        self._DeviceNode__setRam(ram)
+        self._DeviceNode__setMemory(memory)
+        self._DeviceNode__setDownloadRate(downloadRate)
+        self._DeviceNode__setUploadRate(uploadRate)
+        self._DeviceNode__setPowerWatt(powerWatt)
         self.__setBatteryCapacity(batteryCapacity)
 
 
@@ -63,7 +67,8 @@ class Mobile(DeviceNode):
         print("Battery Energy:",self.__batteryEnergy)
         print("\n\n")
 
-
-
+if __name__ == "__main__":
+    obj=Mobile()
+    print(dir(obj))
 
         
