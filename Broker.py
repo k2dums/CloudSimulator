@@ -307,6 +307,7 @@ class Algorithm:
         self.__broker=broker
         assert isinstance(self.__broker,Broker)
         self.__algorithm=-1
+        self.__roundRobinPointer="None"
 
     
     def resourceAllocation(self,algorithm=1):
@@ -338,28 +339,25 @@ class Algorithm:
         assert isinstance(broker,Broker)
         no_Layers=network.getNumberofLayers()
         layers=network.getNetworkLayers()
+        
         #Allocating Tasks only if the devices doesnt have any task
-        for layer in layers:
-            assert isinstance(layer,Layer)
-            for cluster in layer.getClusters():
+        layer0=layers[0]
+        assert isinstance(layer0,Layer)
+        if self.__roundRobinPointer=="None":
+            for cluster in layer0.getClusters():
                 assert isinstance(cluster,Cluster)
                 for device in cluster.getDevices():
                     assert isinstance(device,DeviceNode)
-                    if device.getStatus() == DeviceNode.CREATED:
+                    if device.getStatus()==DeviceNode.CREATED:
                         broker.assignLinearResources(device)
                     if broker.isResourceEmpty():
-                        return 
-        #If task remains , the task is allocated to the very first device in the layer
-        if not(broker.isResourceEmpty):
-            for layer in layers:
-                assert isinstance(layer,Layer)
-                for cluster in layer.getClusters():
-                    assert isinstance(cluster,Cluster)
-                    for device in cluster.getDevices():
-                        assert isinstance(device,DeviceNode)
-                        broker.assignLinearResources(device)
-                        if broker.isResourceEmpty():
-                         return
+                        return
+            
+        #Need for a roundrobin pointer that tracks the last device that was set with task
+
+
+    
+  
     
     def WeightedRoundRobin(self):
         print("Allocation using Weighted Round Robin")
@@ -368,46 +366,73 @@ class Algorithm:
         assert isinstance(broker,Broker) and isinstance(network,Network)
         firstLayer=network.getNetworkLayers()[0]
         assert isinstance(firstLayer,Layer)
-        clusterList=firstLayer.getClusters()
-        minimum=-1
- 
+        clusterList=[]
+        for cluster in firstLayer.getClusters():
+            clusterList.append(cluster)
+        
         #Calculating the processing power per cluster and finding the minimum processing power in a cluster
-        for cluster in clusterList:
-            assert isinstance(cluster,Cluster)
-            temp=0
-            for device in cluster.getDevices():
-                assert isinstance(device,DeviceNode)
-                temp=temp+device.getProcessingPower()
-            if minimum==-1:
-                minimum=temp
-            cluster.setWeight(temp)
-        #We set the weight (processing power /minimum processing power)
-        for cluster in clusterList:
-            assert isinstance(cluster,Cluster)
-            cluster.setWeight(round(cluster.getWeight()/minimum))
-        #Sorting of cluster based on cluster weight
-        for i in range(len(clusterList)):
-            for j in range(i+1,len(clusterList)):
-                clusterA=clusterList[i]
-                clusterB=clusterList[j]
-                assert isinstance(clusterA,Cluster) and isinstance(clusterB,Cluster)
-                if clusterA.getWeight()<clusterB.getWeight():
-                    temp=clusterA
-                    clusterA=clusterB
-                    clusterB=temp
-        #Assigning of task based on weight
-        while( not(broker.isResourceEmpty())):
+        def calculateWeight():
+            print('I am inside calucate Weight')
+            minimum=-1
             for cluster in clusterList:
                 assert isinstance(cluster,Cluster)
-                devices=cluster.getDevices()
-                i=0
-                j=0
-                while (i < cluster.getWeight() ):
-                    broker.assignLinearResources(devices[j])
-                    j+=1
-                    i+=1
-                    if not(j<len(devices)):
-                        j=0
+                processingPower=0
+                for device in cluster.getDevices():
+                    assert isinstance(device,DeviceNode)
+                    processingPower=processingPower+device.getProcessingPower()
+                if minimum==-1:
+                    minimum=processingPower
+                cluster.setWeight(processingPower)
+
+            #We set the weight (processing power /minimum processing power)
+            for cluster in clusterList:
+                assert isinstance(cluster,Cluster)
+                cluster.setWeight(round(cluster.getWeight()/minimum))
+
+        def sortingClusterbyWeight():
+        #Sorting of cluster based on cluster weight
+            print('I am inside sort Weight')
+            for i in range(len(clusterList)):
+                for j in range(i+1,len(clusterList)):
+                    if clusterList[i].getWeight()<clusterList[j].getWeight():
+                        temp=clusterList[i]
+                        clusterList[i]=clusterList[j]
+                        clusterList[j]=temp
+                    if clusterList[i].getWeight()==clusterList[j].getWeight():
+                        if clusterList[i].getId()<clusterList[j].getId():
+                            temp=clusterList[i]
+                            clusterList[i]=clusterList[j]
+                            clusterList[j]=temp
+
+
+            for cluster in clusterList:
+                assert isinstance(cluster,Cluster)
+                print(cluster.getId())
+                
+            
+
+        def assignTask():
+        #Assigning of task based on weight
+            print('I am inside assign task')
+            while( not(broker.isResourceEmpty())):
+                for cluster in clusterList:
+                    assert isinstance(cluster,Cluster)
+                    devices=cluster.getDevices()
+                    
+                    i=0 #This reponsible for the loop (giving the weightage for the cluster)
+                    j=0 #This is responsible for the devices in the cluster tracking
+                    while (i < cluster.getWeight() ):
+                        broker.assignLinearResources(devices[j])
+                        j+=1
+                        i+=1
+                        if not(j<len(devices)):
+                            j=0
+        calculateWeight()
+        sortingClusterbyWeight()
+        assignTask()
+
+
+
     
     def randomAllocation(self):
         print("Allocation using Random Allocation ")
