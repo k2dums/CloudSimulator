@@ -1,8 +1,5 @@
 #This class is for allocating the resources and also is reponsible for the schdeduling algorithm used
 #It assigns the broker id to the device when allocating the resources to it
-from random import random
-from attr import has
-from sympy import minimum
 from Cluster import Cluster
 from Network import Network
 from DeviceNode import DeviceNode
@@ -12,6 +9,37 @@ from Layer import Layer
 from Task import Task
 import random
 
+class Chromosome:
+    def __init__(self,layer:Layer) -> None:
+        self.__section=[]
+        self.__time=-1
+        for cluster in (layer.getNoClusters()):
+            assert isinstance(cluster,Cluster)
+            self.createSection(cluster.getNoOfDevice())
+
+    def createSection(self):
+        section=self.Chormosome_section()
+        self.__section.append(section)
+    def getSections(self):
+        return self.__section
+    class Chormosome_section:
+        def __init__(self,devices:int) -> None:
+            self.__units=[]
+            for i in range(devices):
+                self.createUnits()
+        def getUnits(self):
+            return self.__units
+        def createUnits(self):
+            unit=self.Chromosome_unit()
+            self.__units.append(unit)
+            
+        class Chromosome_unit:
+            def __init__(self) -> None:
+                self.__task=[]
+            def setTask(self,task):
+                self.__task.append(task)
+            def getTask(self):
+                return self.__task
 class Broker:
     __BROKER_ID=0
     __state=["CREATED","READY","QUEUED","SUCCESS","FAILED","PAUSED","RESUMED","FAILED_RESOURCE_UNAVAILABLE"]
@@ -22,8 +50,11 @@ class Broker:
         self.__brokerId=Broker.__BROKER_ID
         self.__deviceId=0
         self.dynamicAllocation=False
+        self.__resourceList=[]
+        self.__allocatedTask=[]
         Broker.__BROKER_ID+=1
-        
+        assert isinstance(self.__network,Network)
+
     
 
     #A broker is responsible for a layer only
@@ -52,7 +83,27 @@ class Broker:
             return 
         assert isinstance(device,DeviceNode)
         device.setResourceList(self.__resourceList[self.__seq_pointer])
+        self.__allocatedTask.append(self.__resourceList[self.__seq_pointer])
         self.__seq_pointer+=1
+    
+    def assignResourcesChromosome(self,chromosomeList:list[Chromosome]) ->None:
+        #if list is empty return immediately
+        if not(chromosomeList):
+            return 
+        assert isinstance(self.__network,Network)
+        for chromosome in chromosomeList:
+            for sectionNo,section in enumerate(chromosome.getSections()):
+                for unitNo,unit in enumerate(section.getUnits()):
+                    if unit.getTask():
+                        for task in unit.getTask():
+                            self.__network.getNetworkLayers()[0].getClusters[sectionNo].getDevices[unitNo].setResourceList(task)
+        # for clusterno,cluster in enumerate(chromosome):
+        #     for deviceno,device in enumerate(cluster):
+        #         if device ==1:
+        #             obj=self.__network.getNetworkLayers()[0].getClusters[clusterno].getDevices[deviceno]
+        #             self.assignLinearResources(obj)
+
+
     
  
         
@@ -77,6 +128,7 @@ class Broker:
        
 
     def AllDeviceStateSummary(self,onlyActive:bool=False):
+        print('\n\n')
         if not(onlyActive):
             print(f" State of All Device Summary".center(100," "))
         else:
@@ -160,8 +212,8 @@ class Broker:
                 assert isinstance(cluster,Cluster)
                 printStr2+=("Cluster "+str(cluster.getId())).center(20," ")
                 printStr+=(str(cluster.getUtilization()*100)+"%").center(20," ")
-        print(printStr2)
-        print(printStr)
+            print(printStr2)
+            print(printStr)
 
 
 
@@ -173,6 +225,28 @@ class Broker:
     def resourceAllocationAlgorithm (self,algorithm=1):
         self.__algo=Algorithm(self.__network,self)
         self.__algo.resourceAllocation(algorithm)
+
+    def printWeightNetwork(self):
+        if hasattr(self,'_Broker__algo'):
+            assert isinstance(self.__algo,Algorithm)
+            algorithm=self.__algo.getAlgorithm()
+            if algorithm==Algorithm._WeightedRoundRobin:
+                print('\n')
+                print("Weight of the Network".center(100," "))
+                network=self.__network
+                assert isinstance(network,Network)
+                for layer in network.getNetworkLayers():
+                    assert isinstance(layer,Layer)
+                    print(f"Layer-{layer.getId()}".center(100," "))
+                    printStr=""
+                    for cluster in layer.getClusters():
+                        assert isinstance(cluster,Cluster)
+                        printStr+=f'Cluster-{cluster.getId()}: {cluster.getWeight()}'.center(20," ")
+                    print(printStr)
+        else:
+            print('\n')
+            print("Error:No weighted algorithm used")
+        return
     
     # def loadbalancing(self,algorithm):
     #     if not(hasattr(self,"_Broker__algorithm")):
@@ -181,7 +255,7 @@ class Broker:
     #     self.__algo.loadbalancing()
 
     
-    def startSimulation(self):
+    def startSimulation(self)->float:
         if not(hasattr(self,self.__activeDevice)):
             self.getActiveDeviceState()
         time=0
@@ -189,12 +263,11 @@ class Broker:
             assert isinstance(device,DeviceNode)
             work=device.getResourceList()
             processingPower=device.getProcessingPower()
-            time+=work/processingPower
+            time+=(work/processingPower)
         print("Total time taken:",time)
         return time
 
-    def startsimulation(self):
-        pass
+
         
     def deviceBreakDown(deviceObj):
         pass
@@ -202,6 +275,8 @@ class Broker:
         pass
     def simualationSummary():
         pass
+    def getTaskList(self):
+        return self.__resourceList
 
   
     def getResourceLength(self):
@@ -215,13 +290,15 @@ class Broker:
         return self.__resourceList
 
 
+
+
 class Algorithm:
 
     _RoundRobin:int=1
     _COFFGA:int=2
     _CONFGA:int=3
     _WeightedRoundRobin:int=4
-    _randomAllocation:int=5
+    _RandomAllocation:int=5
 
     def __init__(self,network,broker) -> None:
 
@@ -229,18 +306,21 @@ class Algorithm:
         assert isinstance(self.__network,Network)
         self.__broker=broker
         assert isinstance(self.__broker,Broker)
+        self.__algorithm=-1
 
     
     def resourceAllocation(self,algorithm=1):
-        if algorithm == Algorithm.RoundRobin:
+
+        self.__algorithm=algorithm
+        if algorithm == Algorithm._RoundRobin:
             self.RoundRobin()
-        elif algorithm == Algorithm.COFFGA:
+        elif algorithm == Algorithm._COFFGA:
             self.COFFGA()
         elif algorithm == Algorithm._CONFGA:
             self.CONFGA()
         elif algorithm==Algorithm._WeightedRoundRobin:
             self.WeightedRoundRobin()
-        elif algorithm==Algorithm._randomAllocation:
+        elif algorithm==Algorithm._RandomAllocation:
             self.randomAllocation()
         else:
             print('Error:Allocation Algorithm not present')
@@ -330,6 +410,7 @@ class Algorithm:
                         j=0
     
     def randomAllocation(self):
+        print("Allocation using Random Allocation ")
         network=self.__network
         broker=self.__broker
         assert isinstance(broker,Broker)
@@ -338,10 +419,11 @@ class Algorithm:
         assert isinstance(firstLayer,Layer)
         clusters=firstLayer.getClusters()
         while(not(broker.isResourceEmpty())):
-            temp=random.randint(0,len(clusters))
-            randomCluster=clusters[temp]
+            randomCluster=random.randint(0,len(clusters)-1)
+            randomCluster=clusters[randomCluster]
             assert isinstance(randomCluster,Cluster)
-            randomDevice=random.randint(0,len(randomCluster.getDevices()))
+            randomDevice=random.randint(0,len(randomCluster.getDevices())-1)
+            randomDevice=randomCluster.getDevices()[randomDevice]
             assert isinstance(randomDevice,DeviceNode)
             broker.assignLinearResources(randomDevice)
 
@@ -395,3 +477,81 @@ class Algorithm:
         
         for i in range(1000):
             pass
+    
+    def GA(self,no_OfGenerations:int=20):
+        print("Allocation using Random Allocation ")
+        broker=self.__broker
+        assert isinstance(broker,Broker)
+        network=self.__network
+        assert isinstance(network,Network)
+        layer=network.getNetworkLayers()[0]
+        assert isinstance(layer,Layer)
+        clusters=layer.getClusters()
+        len_clusters=len(clusters)
+        processingTime=0
+        allocatingList=[]
+
+        # def generateRandomChromosome(no=5):
+        #     chromosome_list=[]
+        #     for i in range(no):
+        #         for task in broker.getTaskList():
+        #             chromosome=[ [0]*len(clusters[i].getNoOfDevice()) for i in range(len_clusters) ]
+        #             while(not(broker.isResourceEmpty())):
+        #                 no_ofClusters=len(chromosome)
+        #                 rand_ClusterNo=random.int(0,no_ofClusters)
+        #                 randomCluster=chromosome[rand_ClusterNo]
+        #                 no_ofDevices=len(randomCluster)
+        #                 rand_DeviceNo=random.int(0,no_ofDevices)
+        #                 #Allocating a value to the chromosome sequence
+        #                 chromosome[rand_ClusterNo][rand_DeviceNo]
+        #                 chromosome.append(chromosome)
+        #     return chromosome_list
+
+        def generateRandomChromosomes(no=5):
+            chromosomeList=[]
+            #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
+            for i in range(no):
+                chromosome=Chromosome(layer)
+                for task in broker.getTaskList():
+                    randomSection=random.randint(0,len(chromosome.getSections()))
+                    randomSection=chromosome.getSections()[randomSection]
+                    randomUnit=random.randint(0,len(randomSection.getUnits()))
+                    randomUnit=randomSection.getUnits()[randomUnit]
+                    randomUnit.setTask(task)
+                chromosomeList.append(chromosome)
+            return chromosomeList
+
+        def calculateChromosome(chromosomeList):
+            #This function is responsible for calculating the time of the overall allocation method in the chromosome
+             for chromosome in chromosomeList:
+                 for section in chromosome.getSection():
+                     pass
+        
+
+        
+        def mutatation(chromosome:list[list[int]])->list[list[int]]:
+            mutation_range=50
+            for i in range(mutation_range):
+                no_ofClusters=len(chromosome)
+                rand_ClusterNo=random.int(0,no_ofClusters)
+                randomCluster=chromosome[rand_ClusterNo]
+                no_ofDevices=len(randomCluster)
+                rand_DeviceNo=random.int(0,no_ofDevices)
+        
+        def binaryTournamentSelection():
+            pass
+            
+
+        
+
+        chromosome=generateRandomChromosomes()
+        broker.assignResourcesChromosome(chromosome)
+        processingTime=broker.startSimulation()
+    
+    def getAlgorithm(self):
+        return self.__algorithm
+
+
+            
+
+
