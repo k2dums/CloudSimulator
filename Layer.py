@@ -59,9 +59,10 @@ class Layer:
 
             for cluster in self.__clusters:
                 assert isinstance(cluster,Cluster)
-                n_devices=int(input(f"Give the number of Devices in {cluster.getId()}-Layer{self.__layerId} : "))
+                n_devices=int(input(f"Give the number of Devices in Cluster-{cluster.getId()}-Layer {self.__layerId} : "))
 
                 for i in range(n_devices):
+                    print(f"Specs for Device {i} in Cluster {cluster.getId()}-Layer {self.getId()}")
                     user=input(f"if device Mobile give 'm', Device give 'd', Station give 's' : ").lower()
                     while  user!='s' and  user!='d' and  user!='m':
                         print("Error:Invalid Input from User")
