@@ -28,7 +28,8 @@ class Cluster:
     def makeDeviceConnections(self):
         self.connectionMatrix=[]
         pass
-
+    def getNoOfDevice(self):
+        return len(self.devices)
     def getId(self):
         return self.id
     def getDevices(self):
