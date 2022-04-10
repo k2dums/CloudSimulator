@@ -23,7 +23,7 @@ class Network:
     
     
     def createAndLayerSpecs(self):
-        n_layers=int(input("Give the number of Network Layers :"))
+        n_layers=int(input("Give the number of Network Layers : "))
         for i in range (n_layers):
             self.createLayer()
         self.layerSpecs()
@@ -42,6 +42,7 @@ class Network:
         if len(self.__networkLayers)==0:
             print("Error:Printing Layer Summary {Zero Layers Present}")
             return 
+        print('\n\n')
         print(f"All Layer Summary-Network {self.__networkId}".center(100," "))
         for layer in self.__networkLayers:
             assert isinstance(layer,Layer)
