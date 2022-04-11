@@ -372,7 +372,6 @@ class Algorithm:
         
         #Calculating the processing power per cluster and finding the minimum processing power in a cluster
         def calculateWeight():
-            print('I am inside calucate Weight')
             minimum=-1
             for cluster in clusterList:
                 assert isinstance(cluster,Cluster)
@@ -391,7 +390,6 @@ class Algorithm:
 
         def sortingClusterbyWeight():
         #Sorting of cluster based on cluster weight
-            print('I am inside sort Weight')
             for i in range(len(clusterList)):
                 for j in range(i+1,len(clusterList)):
                     if clusterList[i].getWeight()<clusterList[j].getWeight():
@@ -413,7 +411,6 @@ class Algorithm:
 
         def assignTask():
         #Assigning of task based on weight
-            print('I am inside assign task')
             while( not(broker.isResourceEmpty())):
                 for cluster in clusterList:
                     assert isinstance(cluster,Cluster)
