@@ -1,5 +1,6 @@
 #This class is for allocating the resources and also is reponsible for the schdeduling algorithm used
 #It assigns the broker id to the device when allocating the resources to it
+from sqlalchemy import null
 from Cluster import Cluster
 from Network import Network
 from DeviceNode import DeviceNode
@@ -255,20 +256,34 @@ class Broker:
     #     self.__algo.loadbalancing()
 
     
-    def startSimulation(self)->float:
-        if not(hasattr(self,self.__activeDevice)):
-            self.getActiveDeviceState()
-        time=0
-        for device in self.__activeDevice:
-            assert isinstance(device,DeviceNode)
-            work=device.getResourceList()
-            processingPower=device.getProcessingPower()
-            time+=(work/processingPower)
-        print("Total time taken:",time)
-        return time
+    def startSimulation(self):
+        network=self.__network
+        assert isinstance(network,Network)
+        layer0=network.getNetworkLayers()[0]
+        assert isinstance(layer0,Layer)
+        clusterTimeList=[]
+        for cluster in layer0.getClusters():
+            deviceTimeList=[]
+            assert isinstance(cluster,Cluster)
+            for device in cluster.getDevices():
+                assert isinstance(device,DeviceNode)
+                time=0
+                for task in device.getResourceList():
+                    assert isinstance(task,Task)
+                    job=task.getInstructionLength()
+                    time+=(job/device.getProcessingPower())
+                deviceTimeList.append(time)
+            maximum=max(deviceTimeList)
+            clusterTimeList.append(maximum)
+        return max(clusterTimeList)
+
+                
 
 
-        
+    def resetTaskAllocated(self):
+        assert isinstance(self.__network,Network)
+        self.__network.resetTaskAllocated()
+        self.__seq_pointer=0
     def deviceBreakDown(deviceObj):
         pass
     def updateDeviceStatus(deviceObj):
@@ -277,6 +292,11 @@ class Broker:
         pass
     def getTaskList(self):
         return self.__resourceList
+    
+    def setRoundRobinPointer(self,device:DeviceNode):
+        if hasattr(self,'_Broker__algo'):
+            assert isinstance(self.__algo,Algorithm)
+            self.__algo.setRoundRobinPointer(device)
 
   
     def getResourceLength(self):
@@ -307,7 +327,7 @@ class Algorithm:
         self.__broker=broker
         assert isinstance(self.__broker,Broker)
         self.__algorithm=-1
-        self.__roundRobinPointer="None"
+        self.__roundRobinPointer=None
 
     
     def resourceAllocation(self,algorithm=1):
@@ -329,8 +349,11 @@ class Algorithm:
   
 
 
-        
-        
+    def setRoundRobinPointer(self,device:DeviceNode):
+        self.__roundRobinPointer=device
+
+
+    #Need for a roundrobin pointer that tracks the last device that was set with taskc
     def RoundRobin(self):
         print("Allocating using Round Robin")
         network=self.__network
@@ -339,21 +362,55 @@ class Algorithm:
         assert isinstance(broker,Broker)
         no_Layers=network.getNumberofLayers()
         layers=network.getNetworkLayers()
-        
-        #Allocating Tasks only if the devices doesnt have any task
         layer0=layers[0]
         assert isinstance(layer0,Layer)
-        if self.__roundRobinPointer=="None":
-            for cluster in layer0.getClusters():
-                assert isinstance(cluster,Cluster)
-                for device in cluster.getDevices():
-                    assert isinstance(device,DeviceNode)
-                    if device.getStatus()==DeviceNode.CREATED:
-                        broker.assignLinearResources(device)
-                    if broker.isResourceEmpty():
-                        return
+
+        #Allocating Tasks only if the devices doesnt have any task
+        def assignWhenPointerNone():     
+            assert isinstance(layer0,Layer)
+            # Enter if only when the roundRobin is None
+            if self.__roundRobinPointer is None:
+                for cluster in layer0.getClusters():
+                    assert isinstance(cluster,Cluster)
+                    for device in cluster.getDevices():
+                        assert isinstance(device,DeviceNode)
+                        if device.getStatus()==DeviceNode.CREATED:
+                            broker.assignLinearResources(device)
+                            broker.setRoundRobinPointer(device)
+                        if broker.isResourceEmpty():
+                            return
+            return #if roundRobinPointer not None
+
+        #when roundrobinpinter is None : make isdevicefound=true
+        #this removes the need for checking is roundrobinPointer is not None
+        #Makes the function more generic
+        def assignWhenPointerNotNone():
+            isdeviceFound=False
+            if self.__roundRobinPointer is not None:
+                while( not(broker.isResourceEmpty())):
+                    for cluster in layer0.getClusters():
+                        assert isinstance(cluster,Cluster)
+                        for device in cluster.getDevices():
+                            assert isinstance(device,DeviceNode)
+                            if isdeviceFound:
+                                broker.assignLinearResources(device)
+                            if not(isdeviceFound) and  device== self.__roundRobinPointer:
+                                isdeviceFound=True
+                            
+
+        assignWhenPointerNone()
+        assignWhenPointerNotNone()
             
-        #Need for a roundrobin pointer that tracks the last device that was set with task
+
+       
+
+
+
+
+
+
+ 
+        
 
 
     
@@ -402,10 +459,6 @@ class Algorithm:
                             clusterList[i]=clusterList[j]
                             clusterList[j]=temp
 
-
-            for cluster in clusterList:
-                assert isinstance(cluster,Cluster)
-                print(cluster.getId())
                 
             
 
