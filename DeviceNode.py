@@ -125,4 +125,6 @@ class DeviceNode:
         self.__powerWatt=pw
     def setStatus(self,status):
         self.__status=status
+    def resetTask(self):
+        self.__resourceList=[]
 
