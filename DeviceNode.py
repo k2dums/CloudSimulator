@@ -120,11 +120,12 @@ class DeviceNode:
         self.__finishTime=ft
     def setResourceList(self,rl):
         self.__resourceList.append(rl)
-        self.__status=DeviceNode.READY
+        self.setStatus(DeviceNode.READY)
     def __setPowerWatt(self,pw:float):
         self.__powerWatt=pw
     def setStatus(self,status):
         self.__status=status
     def resetTask(self):
         self.__resourceList=[]
+        self.setStatus(DeviceNode.CREATED)
 
