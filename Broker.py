@@ -365,41 +365,45 @@ class Algorithm:
         layer0=layers[0]
         assert isinstance(layer0,Layer)
 
-        #Allocating Tasks only if the devices doesnt have any task
-        def assignWhenPointerNone():     
-            assert isinstance(layer0,Layer)
-            # Enter if only when the roundRobin is None
-            if self.__roundRobinPointer is None:
-                for cluster in layer0.getClusters():
-                    assert isinstance(cluster,Cluster)
-                    for device in cluster.getDevices():
-                        assert isinstance(device,DeviceNode)
-                        if device.getStatus()==DeviceNode.CREATED:
-                            broker.assignLinearResources(device)
-                            broker.setRoundRobinPointer(device)
-                        if broker.isResourceEmpty():
-                            return
-            return #if roundRobinPointer not None
+        # #Allocating Tasks only if the devices doesnt have any task
+        # def assignWhenPointerNone():  
+        #     assert isinstance(layer0,Layer)
+        #     # Enter if only when the roundRobin is None
+        #     if self.__roundRobinPointer is None:
+        #         for cluster in layer0.getClusters():
+        #             assert isinstance(cluster,Cluster)
+        #             for device in cluster.getDevices():
+        #                 assert isinstance(device,DeviceNode)
+        #                 if device.getStatus()==DeviceNode.CREATED:
+        #                     broker.assignLinearResources(device)
+        #                     broker.setRoundRobinPointer(device)
+        #                 if broker.isResourceEmpty():
+        #                     return
+        #     return #if roundRobinPointer not None
 
         #when roundrobinpinter is None : make isdevicefound=true
         #this removes the need for checking is roundrobinPointer is not None
         #Makes the function more generic
-        def assignWhenPointerNotNone():
+        def assignTask():  
             isdeviceFound=False
-            if self.__roundRobinPointer is not None:
-                while( not(broker.isResourceEmpty())):
-                    for cluster in layer0.getClusters():
-                        assert isinstance(cluster,Cluster)
-                        for device in cluster.getDevices():
-                            assert isinstance(device,DeviceNode)
-                            if isdeviceFound:
-                                broker.assignLinearResources(device)
-                            if not(isdeviceFound) and  device== self.__roundRobinPointer:
-                                isdeviceFound=True
-                            
+            if self.__roundRobinPointer==None:
+                isdeviceFound=True
+            while( not(broker.isResourceEmpty())):
+                for cluster in layer0.getClusters():
+                    assert isinstance(cluster,Cluster)
+                    for device in cluster.getDevices():
+                        assert isinstance(device,DeviceNode)
+                        if isdeviceFound:
+                            broker.assignLinearResources(device)
+                        if not(isdeviceFound) and  device== self.__roundRobinPointer:
+                            isdeviceFound=True
+                        if broker.isResourceEmpty():
+                            return
+                                
 
-        assignWhenPointerNone()
-        assignWhenPointerNotNone()
+                            
+        # assignWhenPointerNone()
+        assignTask()
             
 
        
