@@ -53,6 +53,10 @@ class Algorithm:
         pass
     def CONFGA():
         pass
+
+    def GA():
+        pass
+        
     
                     
                     
