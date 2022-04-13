@@ -2,6 +2,7 @@
 #The layer object manipulated here
 #This class also makes the connection between the the cluster of the a layer and cluster of different layer
 from Cluster import Cluster
+from DeviceNode import DeviceNode
 from NetworkConnection import NetworkConnection
 from Layer import Layer
 import numpy as np
@@ -225,6 +226,15 @@ class Network:
         return len(self.__networkLayers)
     def getNewtworkId(self)->int:
         return self.__networkId
+    def resetTaskAllocated(self):
+        layer0=self.__networkLayers[0]
+        assert isinstance(layer0,Layer)
+        for cluster in layer0.getClusters():
+            assert isinstance(cluster,Cluster)
+            for device in cluster.getDevices():
+                assert isinstance(device,DeviceNode)
+                device.resetTask()
+
 
 # if __name__=="__main__":
 #       network=Network()
