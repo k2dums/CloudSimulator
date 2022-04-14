@@ -181,3 +181,15 @@ class Layer:
 #         return self.__connectionMatrix
 
    
+    def dummyCluster(self):
+        cluster1=Cluster(1)
+        cluster2=Cluster(2)
+        cluster3=Cluster(3)
+        self.__clusters.append(cluster1)
+        self.__clusters.append(cluster2)
+        self.__clusters.append(cluster3)
+        for cluster in self.__clusters:
+            for i in range(3):
+                assert isinstance(cluster,Cluster)
+                cluster.addDevice()
+        
