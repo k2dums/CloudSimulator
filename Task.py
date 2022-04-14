@@ -34,3 +34,6 @@ class Task:
 
     def getInstructionLength(self):
         return self.__InstructionLength
+    
+    def getId(self):
+        return self.id
