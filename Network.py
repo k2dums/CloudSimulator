@@ -201,8 +201,12 @@ class Network:
         plt.title(f"Network {self.getNewtworkId()}")
         plt.show()
    
-        
-
+    
+    def dummyNetwork(self):
+        self.createLayer()
+        layer0=self.getNetworkLayers()[0]
+        assert isinstance(layer0,Layer)
+        layer0.dummyCluster()
 
 
 
