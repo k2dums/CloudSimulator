@@ -1,7 +1,7 @@
 #This class is modelled to have a generalized feature of a device 
 from typing import Final
 class DeviceNode:
-    __DEVICEID=1
+    __DEVICEID=0
     CREATED:Final[int]=0
     READY:Final[int]=1
     QUEUED:Final[int]=1
