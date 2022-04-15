@@ -584,22 +584,6 @@ class Algorithm:
         processingTime=0
         allocatingList=[]
 
-        # def generateRandomChromosome(no=5):
-        #     chromosome_list=[]
-        #     for i in range(no):
-        #         for task in broker.getTaskList():
-        #             chromosome=[ [0]*len(clusters[i].getNoOfDevice()) for i in range(len_clusters) ]
-        #             while(not(broker.isResourceEmpty())):
-        #                 no_ofClusters=len(chromosome)
-        #                 rand_ClusterNo=random.int(0,no_ofClusters)
-        #                 randomCluster=chromosome[rand_ClusterNo]
-        #                 no_ofDevices=len(randomCluster)
-        #                 rand_DeviceNo=random.int(0,no_ofDevices)
-        #                 #Allocating a value to the chromosome sequence
-        #                 chromosome[rand_ClusterNo][rand_DeviceNo]
-        #                 chromosome.append(chromosome)
-        #     return chromosome_list
-
         def printChromosomeCounter(chromosomes):
             for chromosome in chromosomes:
                 assert isinstance(chromosome,Chromosome)
@@ -634,7 +618,7 @@ class Algorithm:
         
 
 
-        def generateRandomChromosomes(no=5):
+        def generateRandomChromosomes(no=10):
             print("Generating pool of random Chromosome")
             chromosomeList=[]
             #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
@@ -647,20 +631,6 @@ class Algorithm:
                     randomUnit=randomSection.getUnits()[randomUnit]
                     randomUnit.setTask(task)
                 chromosomeList.append(chromosome)
-           
-            # print("Printing a chromosome in detail")
-            # print(chromosomeList[0])
-            # chromosomeData=[]
-            # for section in chromosomeList[0].getSections():
-            #     sectionData=[]
-            #     for unit in section.getUnits():
-            #         unitData=[]
-            #         for task in unit.getTasks():
-            #             print(task,end=",")
-            #             unitData.append(task)
-            #         sectionData.append(unitData)
-            #     chromosomeData.append(sectionData)
-            # print(chromosomeData)
             return chromosomeList
         
        
@@ -668,18 +638,17 @@ class Algorithm:
 
         def calculateChromosome(chromosomeList):
             #This function is responsible for calculating the time of the overall allocation method in the chromosome
-             for chromosome in chromosomeList:
-                 for section in chromosome.getSection():
-                     pass
+
         
 
         
         def mutatation(chromosomes)->list[list[int]]:
-            intraMutationRange=5
-            def intraMutation():
-                print("Undergoing IntraMutation of the Chromosome")
+            
+            def crossover():
+                print("Undergoing crossover of the Chromosome")
+                crossoverRange=5
                 for chromosome in chromosomes:
-                    for i in range(intraMutationRange):
+                    for i in range(crossoverRange):
                         randomSection_A=random.randint(0,len(chromosome.getSections())-1)
                         randomSection_B=random.randint(0,len(chromosome.getSections())-1)
                         randomSection_A=chromosome.getSections()[randomSection_A]
@@ -692,7 +661,6 @@ class Algorithm:
                             #Allows an iteration to not compulsarily mutate
                             if randomUnit_A is randomUnit_B:
                                 continue
-
                             #Below would force a absolute event of mutation to occur 
                             # while (randomUnit_A is randomUnit_B):
                             #     randomUnit_B=random.randint(0,len(randomSection_B.getUnits())-1)
@@ -726,13 +694,42 @@ class Algorithm:
                             randomUnit_A.setTask(randomTask_B)
                             randomUnit_B.setTask(randomTask_A)
 
+                print("Crossover Complete")
 
 
-                       
-                print("IntraMutation Complete")
-                return chromosomes
-
-            return intraMutation()
+            def mutate():
+                print("Undergoing mutation of the Chromosome")
+                mutateRange=4
+                for chromosome in chromosomes:
+                    assert isinstance(chromosome,Chromosome)
+                    for i in range(mutateRange):
+                        #Possibilty of deleting a task or not
+                        flag=random.randint(0,1)
+                        if flag:
+                            randomSection=random.randint(0,len(chromosome.getSections())-1)
+                            randomSection=chromosome.getSections()[randomSection]
+                            assert isinstance(randomSection,Chromosome.Chormosome_section)
+                            randomUnit=random.randint(0,len(randomSection.getUnits())-1)
+                            randomUnit=randomSection.getUnits()[randomUnit]
+                            assert isinstance(randomUnit,Chromosome.Chormosome_section.Chromosome_unit)
+                            if randomUnit.getTasks():
+                                task=random.randint(0,len(randomUnit.getTasks())-1)
+                                task=randomUnit.getTasks()[task]
+                                assert isinstance(task,Task)
+                                randomUnit.getTasks().remove(task)
+                                
+                                #Randomly adding the deleted task to some device
+                                randomSection=random.randint(0,len(chromosome.getSections())-1)
+                                randomSection=chromosome.getSections()[randomSection]
+                                assert isinstance(randomSection,Chromosome.Chormosome_section)
+                                randomUnit=random.randint(0,len(randomSection.getUnits())-1)
+                                randomUnit=randomSection.getUnits()[randomUnit]
+                                assert isinstance(randomUnit,Chromosome.Chormosome_section.Chromosome_unit)
+                                randomUnit.setTask(task)
+                print('Mutation complete')
+    
+            mutate()
+            crossover()
 
 
 
@@ -749,7 +746,7 @@ class Algorithm:
 
         chromosomes=generateRandomChromosomes()
         printChromosomeCounter(chromosomes)
-        chromosomes=mutatation(chromosomes)
+        mutatation(chromosomes)
         printChromosomeCounter(chromosomes)
 
 
