@@ -31,6 +31,11 @@ class Chromosome:
         return self.__section
     def getId(self):
         return self.__id
+    def getTime(self):
+        return self.__time
+    def setTime(self,time):
+        self.__time=time
+        
 
 #Equivalent to a cluster in the network
     class Chormosome_section:
@@ -637,7 +642,18 @@ class Algorithm:
 
 
         def calculateChromosome(chromosomeList):
-            #This function is responsible for calculating the time of the overall allocation method in the chromosome
+            network=Network()
+            broker=Broker(network)
+            for chromosome in chromosomeList:
+                assert isinstance(chromosome,Chromosome)
+                broker.resetTaskAllocated()
+                broker.assignResourcesChromosome(chromosome)
+                time=broker.startSimulation()
+                chromosome.setTime(time)
+
+                
+
+
 
         
 
