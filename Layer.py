@@ -17,6 +17,7 @@ class Layer:
         self.__clusters=[]
         self.__clusterId=0
         self.__weight=-1
+        self.__isStandard=True
       
         
     
@@ -24,16 +25,22 @@ class Layer:
     def inputData(self):
         print("\n")
         print(f"Layer-{self.__layerId} Config")
-        self.addCluster()
+        self.askCluster()
         self.deviceSpecInLayer()
    
+    def askCluster(self):
+        noOfClusters=int(input(f"Give the number of Clusters in Layer-{self.__layerId} : "))
+        for i in range(noOfClusters):
+            self.addCluster()
+           
+
         
     #Creating of n number of  Cluster in a Layer
     def addCluster(self):
-        noOfClusters=int(input(f"Give the number of Clusters in Layer-{self.__layerId} : "))
-        for i in range(noOfClusters):
-            self.__clusters.append(Cluster(self.__clusterId))
-            self.__clusterId+=1
+            cluster=Cluster(self.__clusterId)
+            self.__clusters.append(cluster)
+            self.updateClusterId()
+            return cluster
             
 
     def deviceSpecInLayer(self):
@@ -52,6 +59,7 @@ class Layer:
 
         #For manual specification for the device
         elif user == 'n':
+            self.setisStandard(False)
             temp=input("'y' for a  detailed specification, else 'n' : ").lower()
             while temp !='y' and temp !='n':
                 print("Error:Invalid User Input")
@@ -153,7 +161,7 @@ class Layer:
     #The setter and getter for the attributes of the Layer class
     def getId(self):
         return self.__layerId
-    def getClusters(self):
+    def getClusters(self)->list[Cluster]:
         return self.__clusters
     def getNoClusters(self):
         return len(self.__clusters)
@@ -176,6 +184,13 @@ class Layer:
         return self.__weight
     def getWeight(self):
         return self.__weight
+    def updateClusterId(self):
+        self.__clusterId+=1
+    def getisStandard(self):
+        return self.__isStandard
+    def setisStandard(self,flag:bool):
+        self.__isStandard=flag
+        
         
 #     def getConnectionMatrix(self):
 #         return self.__connectionMatrix
