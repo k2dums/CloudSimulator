@@ -3,6 +3,8 @@
 #This class also makes the connection between the the cluster of the a layer and cluster of different layer
 from Cluster import Cluster
 from DeviceNode import DeviceNode
+from Mobile import Mobile
+from Station import Station
 from NetworkConnection import NetworkConnection
 from Layer import Layer
 import numpy as np
@@ -33,6 +35,7 @@ class Network:
         layer=Layer(self.__getLayerId())
         self.__updateLayerId()
         self.__networkLayers=np.append(self.__networkLayers,layer)
+        return layer
     def layerSpecs(self):
         for layer in self.__networkLayers:
             assert isinstance(layer,Layer)
@@ -207,6 +210,41 @@ class Network:
         layer0=self.getNetworkLayers()[0]
         assert isinstance(layer0,Layer)
         layer0.dummyCluster()
+    
+    def copyNetwork(self,network):
+        for layer in network.getNetworkLayers():
+            assert isinstance(layer,Layer)
+            _layer=self.createLayer()
+            for cluster in layer.getClusters():
+                _cluster=_layer.addCluster()
+                for device in cluster.getDevices():
+                    assert isinstance(device,DeviceNode)
+                    device_copy=None
+                    if isinstance(device,Mobile):
+                        device_copy=_cluster.addMobile()
+                    elif isinstance(device,Station):
+                        device_copy=_cluster.addStation()
+                    elif isinstance(device,DeviceNode):
+                        device_copy=_cluster.addDevice()
+                    if not(layer.getisStandard()):
+                        _layer.setisStandard(False)
+                        assert isinstance(device_copy,DeviceNode)
+                        device_copy._DeviceNode__setProcessingPower(device.getProcessingPower())
+                        device_copy._DeviceNode__setDeviceId(device.getDeviceId())
+                        device_copy._DeviceNode__setRam(device.getRam())
+                        device_copy._DeviceNode__setMemory(device.getMemory())
+                        device_copy._DeviceNode__setDownloadRate(device.getDownloadRate())
+                        device_copy._DeviceNode__setUploadRate(device.getUploadRate())
+                        device_copy._DeviceNode__setPowerWatt(device.getPowerWatt())
+                        device_copy._DeviceNode__setInstructionLength(device.getInstructionLength())
+
+                        if isinstance(device_copy,Mobile):
+                            device_copy._Mobile__setBatteryCapacity(device.getBatteryCapcity())
+
+
+
+              
+
 
 
 
@@ -222,7 +260,7 @@ class Network:
         return self.__layerId
     def __updateLayerId(self)->None:
         self.__layerId+=1
-    def getNetworkLayers(self):
+    def getNetworkLayers(self)->list[Layer]:
         return self.__networkLayers
     def getConnectionMatrix(self):
         return self.__connectionMatrix
