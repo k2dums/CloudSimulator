@@ -12,7 +12,7 @@ class DeviceNode:
     FAILED_RESOURCE_UNAVAILABLE:Final[int]=9
     def __init__(self,pp=2000,ram=4,memory=500,downloadR=100,uploadR=100,powerWatt=-1) -> None:
         #this id correponds to the device\node 
-        self.__deviceId:int=DeviceNode.__setDeviceId()
+        self.__deviceId:int=DeviceNode.__classSetDeviceId()
         #Milion intructions per sec
         self.__processingPower:int=pp
         #the length in Million instruction
@@ -39,7 +39,7 @@ class DeviceNode:
         #self.__processors:int=processors
     
     #This sets the device id for the devices, which can help to identify the device uniquely
-    def __setDeviceId() ->int:
+    def __classSetDeviceId() ->int:
         DeviceNode.__DEVICEID +=1
         return (DeviceNode.__DEVICEID-1)
     
@@ -123,9 +123,10 @@ class DeviceNode:
         self.setStatus(DeviceNode.READY)
     def __setPowerWatt(self,pw:float):
         self.__powerWatt=pw
+    def __setDeviceId(self,id):
+        self.__deviceId=id
     def setStatus(self,status):
         self.__status=status
     def resetTask(self):
         self.__resourceList=[]
         self.setStatus(DeviceNode.CREATED)
-
