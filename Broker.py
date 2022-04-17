@@ -1,7 +1,5 @@
 #This class is for allocating the resources and also is reponsible for the schdeduling algorithm used
 #It assigns the broker id to the device when allocating the resources to it
-from scipy import rand
-from sqlalchemy import null
 from Cluster import Cluster
 from Network import Network
 from DeviceNode import DeviceNode
@@ -10,6 +8,7 @@ from Station import Station
 from Layer import Layer
 from Task import Task
 import random
+import copy
 
 
 #Eqivalent to a layer in the network
@@ -19,13 +18,19 @@ class Chromosome:
         self.__id=Chromosome._id
         self.__section=[]
         self.__time=-1
+        self.__sectionNo=0
         for cluster in (layer.getClusters()):
             assert isinstance(cluster,Cluster)
-            self.createSection(cluster.getNoOfDevice())
+            self.createSection(cluster.getNoOfDevice(),self.__sectionNo)
+            self.__sectionNo+=1
         Chromosome._id+=1
 
-    def createSection(self,devices):
-        section=self.Chormosome_section(devices)
+    def __str__(self):
+        return f'Chromosome [{self.__id}],time[{self.__time}]'
+        
+
+    def createSection(self,devices,sectionNo):
+        section=self.Chormosome_section(devices,sectionNo)
         self.__section.append(section)
     def getSections(self):
         return self.__section
@@ -35,28 +40,37 @@ class Chromosome:
         return self.__time
     def setTime(self,time):
         self.__time=time
+    def setId(self,id):
+        self.__id=id
         
 
 #Equivalent to a cluster in the network
     class Chormosome_section:
-        def __init__(self,devices:int) -> None:
+        def __init__(self,devices:int,id) -> None:
+            self.__id=id
             self.__units=[]
+            self.__deviceNo=0
             for i in range(devices):
                 self.createUnits()
         def getUnits(self):
             return self.__units
         def createUnits(self):
-            unit=self.Chromosome_unit()
+            unit=self.Chromosome_unit(self.__deviceNo)
+            self.__deviceNo+=1
             self.__units.append(unit)
-
+        def getId(self):
+            return self.__id
 #Equivalent to a device in a network             
         class Chromosome_unit:
-            def __init__(self) -> None:
+            def __init__(self,id) -> None:
+                self.__id=id
                 self.__task=[]
             def setTask(self,task:Task):
                 self.__task.append(task)
             def getTasks(self)->list[Task]:
                 return self.__task
+            def getId(self):
+                return self.__id
 class Broker:
     __BROKER_ID=0
     __state=["CREATED","READY","QUEUED","SUCCESS","FAILED","PAUSED","RESUMED","FAILED_RESOURCE_UNAVAILABLE"]
@@ -103,17 +117,19 @@ class Broker:
         self.__allocatedTask.append(self.__resourceList[self.__seq_pointer])
         self.__seq_pointer+=1
     
-    def assignResourcesChromosome(self,chromosomeList:list[Chromosome]) ->None:
-        #if list is empty return immediately
-        if not(chromosomeList):
-            return 
+    def assignResourcesChromosome(self,chromosome:Chromosome) ->None:
         assert isinstance(self.__network,Network)
-        for chromosome in chromosomeList:
-            for sectionNo,section in enumerate(chromosome.getSections()):
-                for unitNo,unit in enumerate(section.getUnits()):
-                    if unit.getTask():
-                        for task in unit.getTask():
-                            self.__network.getNetworkLayers()[0].getClusters[sectionNo].getDevices[unitNo].setResourceList(task)
+        for sectionNo,section in enumerate(chromosome.getSections()):
+            assert isinstance(section,Chromosome.Chormosome_section)
+            for unitNo,unit in enumerate(section.getUnits()):
+                assert isinstance(unit,Chromosome.Chormosome_section.Chromosome_unit)
+                if unit.getTasks():
+                    for task in unit.getTasks():
+                        network=self.__network.getNetworkLayers()[0]
+                        cluster=network.getClusters()[sectionNo]
+                        device=cluster.getDevices()[unitNo]
+                        device.setResourceList(task)
+                        
         # for clusterno,cluster in enumerate(chromosome):
         #     for deviceno,device in enumerate(cluster):
         #         if device ==1:
@@ -525,37 +541,6 @@ class Algorithm:
             assert isinstance(randomDevice,DeviceNode)
             broker.assignLinearResources(randomDevice)
 
-        
-
-
-
-        
-    
-
-
-
-                
-
-            
-        
-
-            
-
-
-
-        
-
-            
-            
-
-
-       
-
-
-
-    
-
-
     
 
     #The offloading stratergies are encoded in a general algorithm
@@ -588,7 +573,7 @@ class Algorithm:
         len_clusters=len(clusters)
         processingTime=0
         allocatingList=[]
-
+        #prints the number of task allocated to a device in a section
         def printChromosomeCounter(chromosomes):
             for chromosome in chromosomes:
                 assert isinstance(chromosome,Chromosome)
@@ -605,7 +590,7 @@ class Algorithm:
                         datasection.append(taskcounter)
                     data.append(datasection)
                 print(data)
-        
+        #prints the the task obj details in the device of a section
         def printChromosomeTaskId(chromosomes):
             for chromosome in chromosomes:
                 assert isinstance(chromosome,Chromosome)
@@ -620,10 +605,8 @@ class Algorithm:
                             datasection.append(task.getId())
                     data.append(datasection)
                 print(data)       
-        
-
-
-        def generateRandomChromosomes(no=10):
+        #generates a sample size of chromosomes
+        def generateRandomChromosomes(no=3):
             print("Generating pool of random Chromosome")
             chromosomeList=[]
             #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
@@ -637,12 +620,10 @@ class Algorithm:
                     randomUnit.setTask(task)
                 chromosomeList.append(chromosome)
             return chromosomeList
-        
-       
-
-
+        #Function for calculating the time taken for the allocation stratergy of the encoded chromosome
         def calculateChromosome(chromosomeList):
             network=Network()
+            network.copyNetwork(self.__network)
             broker=Broker(network)
             for chromosome in chromosomeList:
                 assert isinstance(chromosome,Chromosome)
@@ -650,16 +631,11 @@ class Algorithm:
                 broker.assignResourcesChromosome(chromosome)
                 time=broker.startSimulation()
                 chromosome.setTime(time)
-
-                
-
-
-
-        
-
-        
+        #Function for that mutates the chromosome with mutation and crossover operators
         def mutatation(chromosomes)->list[list[int]]:
-            
+            chromosomes=copy.deepcopy(chromosomes)
+
+            #swaps a allocated task if any with another task if any within a chromosome
             def crossover():
                 print("Undergoing crossover of the Chromosome")
                 crossoverRange=5
@@ -681,7 +657,6 @@ class Algorithm:
                             # while (randomUnit_A is randomUnit_B):
                             #     randomUnit_B=random.randint(0,len(randomSection_B.getUnits())-1)
                             #     randomUnit_B=randomSection_B.getUnits()[randomUnit_B]
-
                         assert isinstance(randomUnit_A,Chromosome.Chormosome_section.Chromosome_unit)
                         assert isinstance(randomUnit_B,Chromosome.Chormosome_section.Chromosome_unit)
                         randomTask_A=[]
@@ -693,14 +668,12 @@ class Algorithm:
                             # print('TaskA',type(randomTask_A),randomTask_A)
                             assert isinstance(randomTask_A,Task)
                             randomUnit_A.getTasks().remove(randomTask_A)
-                        
                         if len(randomUnit_B.getTasks())>0:
                             randomTask_B=random.randint(0,len(randomUnit_B.getTasks())-1)
                             randomTask_B=randomUnit_B.getTasks()[randomTask_B]
                             # print('TaskB',type(randomTask_B),randomTask_B)
                             assert isinstance(randomTask_B,Task)
                             randomUnit_B.getTasks().remove(randomTask_B)
-                     
                         #Swapping of the task
                         if isinstance(randomTask_A,list) and isinstance(randomTask_B,Task):
                             randomUnit_A.setTask(randomTask_B)
@@ -709,19 +682,19 @@ class Algorithm:
                         elif isinstance(randomTask_A,Task) and isinstance(randomTask_B,Task):
                             randomUnit_A.setTask(randomTask_B)
                             randomUnit_B.setTask(randomTask_A)
-
                 print("Crossover Complete")
 
-
+            #with a probabilty of 25% chance of deleting a task from a device and adding it to another device within a chromosome
             def mutate():
                 print("Undergoing mutation of the Chromosome")
-                mutateRange=4
+                mutateRange=5
                 for chromosome in chromosomes:
                     assert isinstance(chromosome,Chromosome)
                     for i in range(mutateRange):
                         #Possibilty of deleting a task or not
-                        flag=random.randint(0,1)
-                        if flag:
+                        flag=random.randint(0,3)
+                        #probabilty of not mutating 3/4=75% , if flag ==3 we mutate
+                        if flag==3:
                             randomSection=random.randint(0,len(chromosome.getSections())-1)
                             randomSection=chromosome.getSections()[randomSection]
                             assert isinstance(randomSection,Chromosome.Chormosome_section)
@@ -733,7 +706,6 @@ class Algorithm:
                                 task=randomUnit.getTasks()[task]
                                 assert isinstance(task,Task)
                                 randomUnit.getTasks().remove(task)
-                                
                                 #Randomly adding the deleted task to some device
                                 randomSection=random.randint(0,len(chromosome.getSections())-1)
                                 randomSection=chromosome.getSections()[randomSection]
@@ -743,27 +715,62 @@ class Algorithm:
                                 assert isinstance(randomUnit,Chromosome.Chormosome_section.Chromosome_unit)
                                 randomUnit.setTask(task)
                 print('Mutation complete')
-    
             mutate()
             crossover()
-
-
-
-
+            return chromosomes
+            #end of muatation()
+        
+        #Merging the child and parent chromosome 
+        def mergePopulation(parent:list[Chromosome],child:list[Chromosome]):
+            chromosomes=[]
+            chromosomes.extend(parent)
+            chromosomes.extend(child)
+            return chromosomes
 
 
 
         
-        def binaryTournamentSelection():
-            pass
+        def binaryTournamentSelection(poption):
+            population=copy.deepcopy(poption)
+            survival=[]
+            if len(population)<2:
+                return population
+            
+            while(population>=2):
+                p1=random.randint(0,len(population)-1)
+                p1=population[p1]
+                population.remove(p1)
+                p1=random.randint(0,len(population)-1)
+                p2=population[p2]
+                assert isinstance(p1,Chromosome) and isinstance(p2,Chromosome)
+                if p1.getTime()<p2.getTime():
+                    survival.append(p1)
+                elif p2.getTime()<p1.getTime():
+                    survival.append(p2)
+                elif p1.getTime() == p2.getTime():
+                    if random.randint(0,1):
+                        survival.append(p1)
+                    else:
+                        survival.append(p2)
+            if len(population):
+                survival.extend(population)
+            return survival
+
+            
             
 
         
 
-        chromosomes=generateRandomChromosomes()
-        printChromosomeCounter(chromosomes)
-        mutatation(chromosomes)
-        printChromosomeCounter(chromosomes)
+        parentChromosomes=generateRandomChromosomes()
+        calculateChromosome(parentChromosomes)
+        childChromosomes=mutatation(parentChromosomes)
+        calculateChromosome(childChromosomes)
+        population=mergePopulation(parentChromosomes,childChromosomes)
+        survival=binaryTournamentSelection(population)
+        
+        
+
+
 
 
 
