@@ -12,6 +12,7 @@ class Task:
     PAUSED:Final[int]=7
     RESUMED:Final[int]=8
     FAILED_RESOURCE_UNAVAILABLE:Final[int]=9
+
     def __init__(self,reqDevice,taskName="",instrn_length=0,fileSize=0,outputSize=0) -> None:
         if taskName=="":
             taskName=str(Task.TASK_ID)
@@ -27,6 +28,9 @@ class Task:
         self.__status=Task.CREATED
         self.__priority=1
         Task.__updateTask_ID()
+    
+    def __str__(self):
+        return f'Task-{self.id}'
         
     
     def __updateTask_ID():
