@@ -269,7 +269,11 @@ class Network:
     def getNewtworkId(self)->int:
         return self.__networkId
     def resetTaskAllocated(self):
-        layer0=self.__networkLayers[0]
+        if not(self.getNetworkLayers()):
+            return
+        if self.getNumberofLayers()<=0:
+            return
+        layer0=self.getNetworkLayers()[0]
         assert isinstance(layer0,Layer)
         for cluster in layer0.getClusters():
             assert isinstance(cluster,Cluster)
@@ -282,7 +286,6 @@ class Network:
 #       network=Network()
 #       network.createLayer()
 #       network.makeLayerConnections()
-
 
         
 
