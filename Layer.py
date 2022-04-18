@@ -37,9 +37,8 @@ class Layer:
         
     #Creating of n number of  Cluster in a Layer
     def addCluster(self):
-            cluster=Cluster(self.__clusterId)
+            cluster=Cluster(self.setClusterId())
             self.__clusters.append(cluster)
-            self.updateClusterId()
             return cluster
             
 
@@ -161,6 +160,9 @@ class Layer:
     #The setter and getter for the attributes of the Layer class
     def getId(self):
         return self.__layerId
+    def setClusterId(self):
+        self.updateClusterId()
+        return self.__clusterId-1
     def getClusters(self)->list[Cluster]:
         return self.__clusters
     def getNoClusters(self):
@@ -197,9 +199,9 @@ class Layer:
 
    
     def dummyCluster(self):
-        cluster1=Cluster(1)
-        cluster2=Cluster(2)
-        cluster3=Cluster(3)
+        cluster1=Cluster(0)
+        cluster2=Cluster(1)
+        cluster3=Cluster(2)
         self.__clusters.append(cluster1)
         self.__clusters.append(cluster2)
         self.__clusters.append(cluster3)
