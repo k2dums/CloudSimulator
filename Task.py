@@ -13,7 +13,7 @@ class Task:
     RESUMED:Final[int]=8
     FAILED_RESOURCE_UNAVAILABLE:Final[int]=9
 
-    def __init__(self,reqDevice,taskName="",instrn_length=0,fileSize=0,outputSize=0) -> None:
+    def __init__(self,reqDevice=-1,taskName="",instrn_length=4000,fileSize=0,outputSize=0) -> None:
         if taskName=="":
             taskName=str(Task.TASK_ID)
         self.id=Task.TASK_ID
