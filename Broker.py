@@ -430,6 +430,7 @@ class Algorithm:
                         assert isinstance(device,DeviceNode)
                         if isdeviceFound:
                             broker.assignLinearResources(device)
+                            self.__roundRobinPointer=device
                         if not(isdeviceFound) and  device== self.__roundRobinPointer:
                             isdeviceFound=True
                         if broker.isResourceEmpty():
@@ -482,7 +483,7 @@ class Algorithm:
             #We set the weight (processing power /minimum processing power)
             for cluster in clusterList:
                 assert isinstance(cluster,Cluster)
-                cluster.setWeight(round(cluster.getWeight()/minimum))
+                cluster.setWeight(cluster.getWeight()/minimum)
 
         def sortingClusterbyWeight():
         #Sorting of cluster based on cluster weight
@@ -493,7 +494,7 @@ class Algorithm:
                         clusterList[i]=clusterList[j]
                         clusterList[j]=temp
                     if clusterList[i].getWeight()==clusterList[j].getWeight():
-                        if clusterList[i].getId()<clusterList[j].getId():
+                        if clusterList[i].getId()>clusterList[j].getId():
                             temp=clusterList[i]
                             clusterList[i]=clusterList[j]
                             clusterList[j]=temp
@@ -507,15 +508,35 @@ class Algorithm:
                 for cluster in clusterList:
                     assert isinstance(cluster,Cluster)
                     devices=cluster.getDevices()
-                    
-                    i=0 #This reponsible for the loop (giving the weightage for the cluster)
-                    j=0 #This is responsible for the devices in the cluster tracking
-                    while (i < cluster.getWeight() ):
-                        broker.assignLinearResources(devices[j])
-                        j+=1
-                        i+=1
-                        if not(j<len(devices)):
-                            j=0
+                    weight=0 #This reponsible for the loop (giving the weightage for the cluster)
+                    while (weight< cluster.getWeight() ):
+                        allocationDirection=[]
+                        for device in devices:
+                            allocationDirection.append(device)
+                        
+                        for i in range(len(allocationDirection)):
+                            for j in range(i+1,len(allocationDirection)):
+                                if len(allocationDirection[i].getResourceList())>len(allocationDirection[j].getResourceList()):
+                                    temp=allocationDirection[i]
+                                    allocationDirection[i]=allocationDirection[j]
+                                    allocationDirection[j]=temp
+                                
+                                if len(allocationDirection[i].getResourceList()) ==len(allocationDirection[j].getResourceList()):
+                                    if allocationDirection[i].getDeviceId()>allocationDirection[j].getDeviceId():
+                                            temp=allocationDirection[i]
+                                            allocationDirection[i]=allocationDirection[j]
+                                            allocationDirection[j]=temp
+
+                        for device in allocationDirection:
+                            broker.assignLinearResources(device)
+                            weight+=1
+
+                            if broker.isResourceEmpty():
+                                return
+                            if weight>=cluster.getWeight():
+                                break
+                            
+
         calculateWeight()
         sortingClusterbyWeight()
         assignTask()
@@ -561,7 +582,7 @@ class Algorithm:
         for i in range(1000):
             pass
     
-    def ga(self,no_OfGenerations:int=20):
+    def ga(self,gernerationLimit:int=7):
         print("Allocation using Genetic Algorithm ")
         broker=self.__broker
         assert isinstance(broker,Broker)
@@ -606,8 +627,8 @@ class Algorithm:
                     data.append(datasection)
                 print(data)       
         #generates a sample size of chromosomes
-        def generateRandomChromosomes(no=3):
-            print("Generating pool of random Chromosome")
+        def generateRandomChromosomes(no=10):
+            # print("Generating pool of random Chromosome")
             chromosomeList=[]
             #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
             for i in range(no):
@@ -624,12 +645,12 @@ class Algorithm:
         def calculateChromosome(chromosomeList):
             network=Network()
             network.copyNetwork(self.__network)
-            broker=Broker(network)
+            tempbroker=Broker(network)
             for chromosome in chromosomeList:
                 assert isinstance(chromosome,Chromosome)
-                broker.resetTaskAllocated()
-                broker.assignResourcesChromosome(chromosome)
-                time=broker.startSimulation()
+                tempbroker.resetTaskAllocated()
+                tempbroker.assignResourcesChromosome(chromosome)
+                time=tempbroker.startSimulation()
                 chromosome.setTime(time)
         #Function for that mutates the chromosome with mutation and crossover operators
         def mutatation(chromosomes)->list[list[int]]:
@@ -637,8 +658,8 @@ class Algorithm:
 
             #swaps a allocated task if any with another task if any within a chromosome
             def crossover():
-                print("Undergoing crossover of the Chromosome")
-                crossoverRange=5
+                # print("Undergoing crossover of the Chromosome")
+                crossoverRange=4
                 for chromosome in chromosomes:
                     for i in range(crossoverRange):
                         randomSection_A=random.randint(0,len(chromosome.getSections())-1)
@@ -682,12 +703,12 @@ class Algorithm:
                         elif isinstance(randomTask_A,Task) and isinstance(randomTask_B,Task):
                             randomUnit_A.setTask(randomTask_B)
                             randomUnit_B.setTask(randomTask_A)
-                print("Crossover Complete")
+                # print("Crossover Complete")
 
             #with a probabilty of 25% chance of deleting a task from a device and adding it to another device within a chromosome
             def mutate():
-                print("Undergoing mutation of the Chromosome")
-                mutateRange=5
+                # print("Undergoing mutation of the Chromosome")
+                mutateRange=3
                 for chromosome in chromosomes:
                     assert isinstance(chromosome,Chromosome)
                     for i in range(mutateRange):
@@ -714,7 +735,7 @@ class Algorithm:
                                 randomUnit=randomSection.getUnits()[randomUnit]
                                 assert isinstance(randomUnit,Chromosome.Chormosome_section.Chromosome_unit)
                                 randomUnit.setTask(task)
-                print('Mutation complete')
+                # print('Mutation complete')
             mutate()
             crossover()
             return chromosomes
@@ -736,11 +757,11 @@ class Algorithm:
             if len(population)<2:
                 return population
             
-            while(population>=2):
+            while(len(population)>=2):
                 p1=random.randint(0,len(population)-1)
                 p1=population[p1]
                 population.remove(p1)
-                p1=random.randint(0,len(population)-1)
+                p2=random.randint(0,len(population)-1)
                 p2=population[p2]
                 assert isinstance(p1,Chromosome) and isinstance(p2,Chromosome)
                 if p1.getTime()<p2.getTime():
@@ -756,19 +777,52 @@ class Algorithm:
                 survival.extend(population)
             return survival
 
-            
-            
+        def nSelect(survivors,size=5):
+            selected=[]
+            #Swapping
+            for i in range(len(survivors)):
+                for  j in range(i+1,len(survivors)):
+                    if survivors[i].getTime()>survivors[j].getTime():
+                        temp=survivors[i]
+                        survivors[i]=survivors[j]
+                        survivors[j]=temp
 
-        
+            for i in range(0,size):
+                selected.append(survivors[i])
+            return selected
+            
 
         parentChromosomes=generateRandomChromosomes()
-        calculateChromosome(parentChromosomes)
-        childChromosomes=mutatation(parentChromosomes)
-        calculateChromosome(childChromosomes)
-        population=mergePopulation(parentChromosomes,childChromosomes)
-        survival=binaryTournamentSelection(population)
+        selected=[]
+        # print("\n \nParent Chromosomes")
+        # print('Task ID')
+        # printChromosomeTaskId(parentChromosomes)
+        # print('\n')
+        # print('task Counter')
+        # printChromosomeCounter(parentChromosomes)
+        generation=0
+
+        while (generation < gernerationLimit):
+            calculateChromosome(parentChromosomes)
+            childChromosomes=mutatation(parentChromosomes)
+            calculateChromosome(childChromosomes)
+            population=mergePopulation(parentChromosomes,childChromosomes)
+            survivors=binaryTournamentSelection(population)
+            selected=nSelect(survivors)
+            parentChromosomes=selected
+            generation+=1
         
-        
+        # print("\n\n The selected chromosomes")
+        # print("Task ID")
+        # printChromosomeTaskId(selected)
+        # print('\n')
+        # print('Task Counter')
+        # printChromosomeCounter(selected)
+       
+        if len(selected)>0:
+            broker.assignResourcesChromosome(selected[0])
+        else:
+            print("Ga algorithm has no selected chromosome")
 
 
 
