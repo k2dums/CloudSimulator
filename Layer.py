@@ -18,7 +18,11 @@ class Layer:
         self.__clusterId=0
         self.__weight=-1
         self.__isStandard=True
-      
+    
+    def __repr__(self) -> str:
+        return f'Layer {self.__layerId}'
+    def __str__(self) -> str:
+        return f'Layer {self.__layerId}'
         
     
     #This is  for  getting  inital input for the number of cluster,devices and stations
