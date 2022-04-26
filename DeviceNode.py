@@ -38,6 +38,11 @@ class DeviceNode:
         #Need for the number of processors 
         #self.__processors:int=processors
     
+    def __str__(self) -> str:
+        return f'Device {self.__deviceId}'
+    def __repr__(self) -> str:
+        return f'Device {self.__deviceId}'
+    
     #This sets the device id for the devices, which can help to identify the device uniquely
     def __classSetDeviceId() ->int:
         DeviceNode.__DEVICEID +=1
