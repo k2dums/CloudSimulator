@@ -10,7 +10,7 @@ class Mobile(DeviceNode):
         self.__batteryCapacity=4000
         #the eneergy of the battery stored
         self.__batteryEnergy=self.__batteryCapacity
-        super().__init__()
+        super().__init__(900)
     
  
         
