@@ -7,6 +7,12 @@ class Cluster:
         self.devices=[]
         self.weight=-1
         # self.connectionMatrix=[]
+    def __str__(self) -> str:
+        return f'Cluster {self.id}'
+    
+    def __repr__(self) -> str:
+        return f'Cluster {self.id}'
+        
         
 
     def addDevice(self):
