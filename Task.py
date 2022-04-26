@@ -31,6 +31,10 @@ class Task:
     
     def __str__(self):
         return f'Task-{self.id}'
+    
+    def __repr__(self) -> str:
+        return f'Task-{self.id}'
+        
         
     
     def __updateTask_ID():
