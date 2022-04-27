@@ -6,7 +6,7 @@ from Broker import Algorithm
 from Task import Task
 from Graph import Graph
 from TaskGenerator import TaskGenerator
-if __name__ == "__main__":
+def main():
     #instances for the task
     # taskA=Task(2,"I am Task 1",2000,200,200)
     # taskB=Task(3,"I am Task 2",4000,400,400)
@@ -24,11 +24,11 @@ if __name__ == "__main__":
     #task size
     #network config
     # task=[taskA,taskB,taskC,taskD,taskE,taskF,taskG,taskH,taskI,taskJ,taskK,taskL]
-    algorithms=[Algorithm._RandomAllocation,Algorithm._GA,Algorithm._RoundRobin,Algorithm._WeightedRoundRobin]
-    namelist=["Random Allocation","Genetic Algorithm","Round-Robin","Weighted Round-Robin"]
+    algorithms=[Algorithm._RandomAllocation,Algorithm._RoundRobin,Algorithm._WeightedRoundRobin]
+    namelist=["Random Allocation","Round-Robin","Weighted Round-Robin"]
     taskSize=[200, 400, 600, 800, 1000, 1200]
     network=Network()
-    network.createAndLayerSpecs()
+    network.dummyNetwork()
     broker=Broker(network)
     # broker.setResourceList(task)
     timeList=[]
