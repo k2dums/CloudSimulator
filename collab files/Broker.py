@@ -796,7 +796,7 @@ class Algorithm:
             #end of muatation()
         
         #Merging the child and parent chromosome 
-        def mergePopulation(parent:list[Chromosome],child:list[Chromosome]):
+        def mergePopulation(parent,child):
             chromosomes=[]
             chromosomes.extend(parent)
             chromosomes.extend(child)
