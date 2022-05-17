@@ -1,13 +1,9 @@
 #This class keeps a track of all the layer created 
 #The layer object manipulated here
 #This class also makes the connection between the the cluster of the a layer and cluster of different layer
-from Cluster import Cluster
-from DeviceNode import DeviceNode
-from Mobile import Mobile
-from Station import Station
+
 from NetworkConnection import NetworkConnection
-from Layer import Layer
-import numpy as np
+from Layer import Layer,Cluster,DeviceNode,Mobile,Station,np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style

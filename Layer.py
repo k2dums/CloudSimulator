@@ -2,10 +2,7 @@
 #The LayerId static variable needs to be part of the Network class
 
 import numpy as np
-from DeviceNode import DeviceNode
-from Mobile import Mobile
-from Station import Station
-from Cluster import Cluster
+from Cluster import Cluster,DeviceNode,Mobile,Station
 
 
 
@@ -214,3 +211,6 @@ class Layer:
                 assert isinstance(cluster,Cluster)
                 cluster.addDevice()
         
+
+if __name__=='__main__':
+    print(dir())

@@ -2,9 +2,7 @@
 #which is connected to another cluster in another layer
 #Since a layer can have mulitple clusters ,therefore need to track
 #which cluster is connecting to which cluster between two layers
-from Cluster import Cluster
-from Layer import Layer
-import numpy as np
+from Layer import Layer,Cluster,np
 class NetworkConnection:
     def __init__(self,start,end,layerA,layerB) -> None:
         assert isinstance(layerA,Layer) and isinstance(layerB,Layer)

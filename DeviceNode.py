@@ -37,6 +37,8 @@ class DeviceNode:
         self.__status:int=DeviceNode.CREATED
         #Need for the number of processors 
         #self.__processors:int=processors
+        #Tracks the task that has been finished
+        self.__finishList=[]
     
     def __str__(self) -> str:
         return f'Device {self.__deviceId}'
@@ -135,3 +137,6 @@ class DeviceNode:
     def resetTask(self):
         self.__resourceList=[]
         self.setStatus(DeviceNode.CREATED)
+
+if __name__=='__main__':
+    print(dir())

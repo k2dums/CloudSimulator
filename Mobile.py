@@ -1,6 +1,6 @@
 #This class is modelled to have a battery within the device and its needed behaviours
-from typing import Final
-from DeviceNode import DeviceNode
+
+from DeviceNode import DeviceNode,Final
 
 class Mobile(DeviceNode):
     #Here we are assuming the nominal voltage of the mobile device to be around 3.7
@@ -68,7 +68,4 @@ class Mobile(DeviceNode):
         print("\n\n")
 
 if __name__ == "__main__":
-    obj=Mobile()
-    print(dir(obj))
-
-        
+        print(dir())

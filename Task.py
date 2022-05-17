@@ -45,3 +45,28 @@ class Task:
     
     def getId(self):
         return self.id
+
+
+def smallTask():
+    """
+    Function returns a task object
+    The task object has instruction length 4000
+    """
+    task=Task()
+    return Task
+
+def mediumTask():
+    """
+    Function returns a task object 
+    The task object has an instruction length of 10,000
+    """
+    task=Task(instrn_length=10000)
+    return task
+
+def largeTask():
+    """
+    Function returns a task object
+    The task object has an instruction length of 40,000
+    """
+    task=Task(instrn_length=40000)
+    return task

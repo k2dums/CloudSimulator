@@ -1,17 +1,16 @@
 #This class is for allocating the resources and also is reponsible for the schdeduling algorithm used
 #It assigns the broker id to the device when allocating the resources to it
-from Cluster import Cluster
-from Network import Network
-from DeviceNode import DeviceNode
-from Mobile import Mobile
-from Station import Station
-from Layer import Layer
+from Network import Network,Layer,Cluster,DeviceNode,Mobile,Station
 from Task import Task
+from TaskGenerator import TaskGenerator
 import random
 import copy
 from Chromosome import Chromosome
 from ChromosomeCopy import ChromosomeCopy
-
+from threading import Thread
+import time
+import tqdm
+import Graph
 class Broker:
     __BROKER_ID=0
     __state=["CREATED","READY","QUEUED","SUCCESS","FAILED","PAUSED","RESUMED","FAILED_RESOURCE_UNAVAILABLE"]
@@ -24,6 +23,10 @@ class Broker:
         self.dynamicAllocation=False
         self.__resourceList=[]
         self.__allocatedTask=[]
+        self.__algorithm=""
+        self.__algo=None
+        self.__table={}
+        self.flag1=False
         Broker.__BROKER_ID+=1
         assert isinstance(self.__network,Network)
 
@@ -150,8 +153,14 @@ class Broker:
                             type="Non Mobile"
                     type=type.center(20," ")
                     print(f"{id}|{type}|{status}|{job}")
-        
 
+    def setAlgorithm(self,algorithm):
+        self.__algorithm=algorithm
+    def getAlgorithm(self):
+        return self.__algorithm
+    def getAlgoObject(self):
+        return self.__algo
+    
     def getUtilization(self):
         network=self.__network
         assert isinstance(network,Network)
@@ -201,7 +210,8 @@ class Broker:
 
             
 
-    def resourceAllocationAlgorithm (self,algorithm=1):
+    def resourceAllocationAlgorithmStatic(self,algorithm=1):
+        self.setAlgorithm(algorithm)
         self.__algo=Algorithm(self.__network,self)
         self.__algo.resourceAllocation(algorithm)
 
@@ -289,7 +299,98 @@ class Broker:
     
     def getNetwork(self):
         return self.__network
+    
+    def ga_vs_lot(self):
+        broker=self
+        network=self.__network
+        algo=Algorithm(network,broker)
+        lotlist,timelist=algo.ga(test=True)
+        print('lotlist',lotlist)
+        print('timelist',timelist)
+        graph=Graph.Graph()
+        graph.plotBarGraph(values=timelist,names=lotlist,title='lotsize vs time',xlabel='lotsize',ylabel='time taken')
 
+        
+
+    def trackUtilization(self,wait=False,flag=False):
+        if not(flag):
+            network=self.getNetwork()
+            layer=network.getNetworkLayers()[0]
+            assert isinstance(layer,Layer)
+            clusters=layer.getClusters()
+            n_clusters=len(clusters)
+            pbar_list=[]
+            time.sleep(10)
+            for i in range(n_clusters):
+                pbar=tqdm.tqdm(total=clusters[i].getNoOfDevice())
+                pbar.set_description(f'Cluster-{clusters[i].getId()} Job Queue')
+                pbar_list.append(pbar)
+            if len(pbar_list) != len(clusters):
+                print('Error:Broker.displayUtilizaiton() : length mismatch pbar and clusters')
+            while(True):
+                if wait:
+                    time.sleep(15)
+                for cluster,pbar in zip(clusters,pbar_list):
+                    assert isinstance(cluster,Cluster)
+                    cluster_utilization=int(cluster.getActiveDeviceNo())
+                    pbar.refresh()
+                    pbar.n=cluster_utilization
+                    time.sleep(1.5)
+
+    def dynamicInput(self,auto=True):
+        if not(auto):
+            self.flag1=True
+        user=input("1:Random Tasks\n2:Resetting the network\n3:Changing the algorithm\n")
+        if user:
+            self.trackUtilization(wait=True,flag=True)
+        try :
+            user=int(user)
+        except:
+            pass
+        if user==1:
+            print('Generating random tasks')
+        elif user==2:
+            print('Resetting the allocated tasks')
+        elif user==3:
+            print('Changing the algorithm')
+        self.trackUtilization(wait=False,flag=False)
+     
+    def dynamicSimulation(self):
+        network=self.getNetwork()
+        assert isinstance(network,Network)
+        layer0=network.getNetworkLayers()[0]
+        activeDevices=[]
+        activethread=[]
+        taskgiven=[]
+        # t1=Thread(target=self.dynamicInput)
+        t2=Thread(target=self.trackUtilization)
+        t2.start()
+        while (True):
+            self.dynamicInput()
+
+    
+            
+      
+
+
+  
+ 
+          
+          
+
+            
+        
+
+
+
+
+        
+
+
+        
+              
+            
+            
 
 
 
@@ -384,7 +485,6 @@ class Algorithm:
                             isdeviceFound=True
                         if broker.isResourceEmpty():
                             return
-                                
 
                             
         # assignWhenPointerNone()
@@ -512,7 +612,6 @@ class Algorithm:
             randomDevice=randomCluster.getDevices()[randomDevice]
             assert isinstance(randomDevice,DeviceNode)
             broker.assignLinearResources(randomDevice)
-
     
 
     #The offloading stratergies are encoded in a general algorithm
@@ -533,7 +632,7 @@ class Algorithm:
         for i in range(1000):
             pass
     
-    def ga(self,gernerationLimit:int=20):
+    def ga(self,gernerationLimit:int=20,lotsize=10,test=False):
         print("Allocation using Genetic Algorithm ")
         broker=self.__broker
         assert isinstance(broker,Broker)
@@ -578,7 +677,7 @@ class Algorithm:
                     data.append(datasection)
                 print(data)       
         #generates a sample size of chromosomes
-        def generateRandomChromosomes(no=15):
+        def generateRandomChromosomes(no=lotsize):
             # print("Generating pool of random Chromosome")
             chromosomeList=[]
             #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
@@ -747,7 +846,7 @@ class Algorithm:
                 survival.extend(population)
             return survival
 
-        def nSelect(survivors,size=15):
+        def nSelect(survivors,size=lotsize):
             selected=[]
             #Swapping
             for i in range(len(survivors)):
@@ -776,36 +875,62 @@ class Algorithm:
         # print('task Counter')
         # printChromosomeCounter(parentChromosomes)
         generation=0
-
-        while (generation < gernerationLimit):
-            calculateChromosome(parentChromosomes)
-            childChromosomes=mutatation(parentChromosomes)
-            calculateChromosome(childChromosomes)
-            population=mergePopulation(parentChromosomes,childChromosomes)
-            survivors=binaryTournamentSelection(population)
-            selected=nSelect(survivors)
-            parentChromosomes=selected
-            generation+=1
-        
-        # print("\n\nThe selected chromosomes")
-        # for x in selected:
-        #     print(x)
-        # print("Task ID")
-        # printChromosomeTaskId(selected)
-        # print('\n')
-        # print('Task Counter')
-        # printChromosomeCounter(selected)
-       
-        if len(selected)>0:
-            broker.assignResourcesChromosome(selected[0])
-          
-        else:
-            print("Ga algorithm has no selected chromosome")
+        if test==False:
+            while (generation < gernerationLimit):
+                calculateChromosome(parentChromosomes)
+                childChromosomes=mutatation(parentChromosomes)
+                calculateChromosome(childChromosomes)
+                population=mergePopulation(parentChromosomes,childChromosomes)
+                survivors=binaryTournamentSelection(population)
+                selected=nSelect(survivors)
+                parentChromosomes=selected
+                generation+=1
+            if len(selected)>0:
+                broker.assignResourcesChromosome(selected[0])
+            else:
+                print("Ga algorithm has no selected chromosome")
+        if test==True:
+            user_input=input('Give the lot size seperated by commas eg 1,2,3\n')
+            lotlist= list(map(lambda x:x.strip(),user_input.split(',')))
+            timelister=[]
+            for lot in lotlist:
+                lotsize=lot
+                timestart=time.time()
+                while (generation < gernerationLimit):
+                    calculateChromosome(parentChromosomes)
+                    childChromosomes=mutatation(parentChromosomes)
+                    calculateChromosome(childChromosomes)
+                    population=mergePopulation(parentChromosomes,childChromosomes)
+                    survivors=binaryTournamentSelection(population)
+                    selected=nSelect(survivors)
+                    parentChromosomes=selected
+                    generation+=1
+                if len(selected)>0:
+                    broker.assignResourcesChromosome(selected[0])
+                else:
+                    print("Ga algorithm has no selected chromosome")
+                timeend=time.time()
+                timeduration=timestart-timeend
+                timelister.append(timeduration)
+            return lotlist,timelister
 
 
     def getAlgorithm(self):
         return self.__algorithm
 
+
+if __name__=="__main__":
+    network=Network()
+    network.dummyNetwork()
+    broker=Broker(network)
+    layer0=network.getNetworkLayers()[0]
+    tasks=TaskGenerator.generatenoTask(20)
+    broker.setResourceList(tasks)
+    broker.resourceAllocationAlgorithm(Algorithm._RandomAllocation)
+    cluster1=layer0.getClusters()[1]
+   
+    broker.ActiveDeviceStateSummary()
+    print(cluster1.getId())
 
 
             

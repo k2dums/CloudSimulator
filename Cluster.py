@@ -62,13 +62,25 @@ class Cluster:
 
     def getActiveDeviceNo(self):
         activeNo=0
-        for device in self.devices():
+        for device in self.getDevices():
             assert isinstance(device,DeviceNode)
-            if device.getStatus==DeviceNode.READY:
+            if device.getStatus()==DeviceNode.READY:
                 activeNo+=1
         return activeNo
         
 
+if __name__=='__main__':
+    cluster=Cluster(1)
+    for i in range(10):
+        cluster.addDevice()
+    print("Device",cluster.getNoOfDevice())
+    devices=cluster.getDevices()
+    for i in range(5):
+        device=devices[i]
+        assert isinstance(device,DeviceNode)
+        device.setStatus(DeviceNode.READY)
+    print(cluster.getActiveDeviceNo())
+        
 
 
 
