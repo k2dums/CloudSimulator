@@ -27,7 +27,8 @@ if __name__ == "__main__":
     namelist=["Random Allocation","Genetic Algorithm","Round-Robin","Weighted Round-Robin"]
     taskSize=[200, 400, 600, 800, 1000, 1200]
     network=Network()
-    network.dummyNetwork()
+    # network.dummyNetwork()
+    network.createAndLayerSpecs()
     broker=Broker(network)
     # broker.setResourceList(task)
     timeList=[]
@@ -38,17 +39,14 @@ if __name__ == "__main__":
             tasks=TaskGenerator.generatenoTask(size)
             broker.setResourceList(tasks)
             broker.resetTaskAllocated()
-            broker.resourceAllocationAlgorithm(algo)
+            broker.resourceAllocationAlgorithmStatic(algo)
             time=broker.startSimulation()
             timealgo.append(time)
-            if algo==Algorithm._WeightedRoundRobin:
-                # broker.ActiveDeviceStateSummary()
-                broker.printWeightNetwork()
         timeList.append(timealgo)
     
     Graph.lineGraph(namelist,taskSize,timeList)
     barplotx=[timeTaken[-1] for timeTaken in timeList]
-    Graph.plotBarGraph(barplotx,namelist)
+    Graph.plotBarGraph(values=barplotx,names=namelist)
     print(timeList)
     # broker.AllDeviceStateSummary()
     print("\n\n")

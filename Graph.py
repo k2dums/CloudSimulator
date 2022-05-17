@@ -41,7 +41,7 @@ class Graph():
         plt.show()
 
     
-    def lineGraph(legend_text,x:list,timeList:list[list[int]],title="Algorithms Time taken Vs Task Size",xlabel="No of Tasks",ylabel="Time Taken"):
+    def lineGraph(legend_text, x:list,timeList:list[list[int]],title="Algorithms Time taken Vs Task Size",xlabel="No of Tasks",ylabel="Time Taken"):
         """
         Plots the graph 
         legend_text:list[string] the text that will be printed as label

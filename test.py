@@ -21,7 +21,9 @@
 
 from Network import Network
 from Broker import Broker
+from TaskGenerator import TaskGenerator
 network=Network()
-network.dummyNetwork()
+#30 tasks
+network.createAndLayerSpecs()
 broker=Broker(network)
-broker.ga_vs_lot()
+broker.dynamicSimulation()

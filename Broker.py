@@ -291,6 +291,8 @@ class Broker:
         return self.__resourceList
 
     def isResourceEmpty(self)->bool:
+        if len(self.__resourceList)==0:
+            return True
         if self.__seq_pointer!=len(self.__resourceList):
             return False
         return True
@@ -320,7 +322,7 @@ class Broker:
             clusters=layer.getClusters()
             n_clusters=len(clusters)
             pbar_list=[]
-            time.sleep(10)
+            time.sleep(1)
             for i in range(n_clusters):
                 pbar=tqdm.tqdm(total=clusters[i].getNoOfDevice())
                 pbar.set_description(f'Cluster-{clusters[i].getId()} Job Queue')
@@ -335,7 +337,6 @@ class Broker:
                     cluster_utilization=int(cluster.getActiveDeviceNo())
                     pbar.refresh()
                     pbar.n=cluster_utilization
-                    time.sleep(1.5)
 
     def dynamicInput(self,auto=True):
         if not(auto):
@@ -362,11 +363,14 @@ class Broker:
         activeDevices=[]
         activethread=[]
         taskgiven=[]
-        # t1=Thread(target=self.dynamicInput)
+        taskgiven=TaskGenerator.generatenoTask(30)
+        self.setResourceList(taskgiven)
+        t1=Thread(target=self.resourceAllocationAlgorithmStatic,args=(Algorithm._WeightedRoundRobin,))
         t2=Thread(target=self.trackUtilization)
+        t1.start()
         t2.start()
-        while (True):
-            self.dynamicInput()
+   
+            
 
     
             
@@ -481,6 +485,7 @@ class Algorithm:
                         if isdeviceFound:
                             broker.assignLinearResources(device)
                             self.__roundRobinPointer=device
+                            time.sleep(1)
                         if not(isdeviceFound) and  device== self.__roundRobinPointer:
                             isdeviceFound=True
                         if broker.isResourceEmpty():
@@ -581,7 +586,7 @@ class Algorithm:
                         for device in allocationDirection:
                             broker.assignLinearResources(device)
                             weight+=1
-
+                            time.sleep(1)
                             if broker.isResourceEmpty():
                                 return
                             if weight>=cluster.getWeight():
@@ -612,6 +617,7 @@ class Algorithm:
             randomDevice=randomCluster.getDevices()[randomDevice]
             assert isinstance(randomDevice,DeviceNode)
             broker.assignLinearResources(randomDevice)
+            time.sleep(1)
     
 
     #The offloading stratergies are encoded in a general algorithm
