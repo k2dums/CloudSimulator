@@ -36,6 +36,7 @@ class Network:
         for layer in self.__networkLayers:
             assert isinstance(layer,Layer)
             layer.inputData()
+            return
     
     #This prints the all layer in a network and its  summary including the clusters and its devices 
     def printAllLayerSummary(self):
@@ -202,6 +203,11 @@ class Network:
    
     
     def dummyNetwork(self):
+        """
+        Function creates a layer (one layer)
+        Adds 3 cluster each having 3 devices
+        Since the device is created in Standard the ProcessingPower=4000
+        """
         self.createLayer()
         layer0=self.getNetworkLayers()[0]
         assert isinstance(layer0,Layer)
@@ -276,7 +282,8 @@ class Network:
             for device in cluster.getDevices():
                 assert isinstance(device,DeviceNode)
                 device.resetTask()
-
+    def debugPrint(self):
+        print("I am Network")
 
 # if __name__=="__main__":
 #       network=Network()

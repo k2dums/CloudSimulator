@@ -59,6 +59,13 @@ class Cluster:
                 occupied+=1
         utilization=occupied/n
         return utilization
+    
+    def isThereTask(self):
+        for device in self.devices:
+            assert isinstance(device,DeviceNode)
+            if device.getResourceList():
+                return True
+        return False
 
     def getActiveDeviceNo(self):
         activeNo=0
@@ -67,6 +74,13 @@ class Cluster:
             if device.getStatus()==DeviceNode.READY:
                 activeNo+=1
         return activeNo
+    def getNonActiveDevices(self):
+        nonActive=[]
+        for device in self.getDevices():
+            assert isinstance(device,DeviceNode)
+            if (device.getStatus()==DeviceNode.CREATED) or (device.getStatus()==DeviceNode.IDLE) or (device.getStatus()==DeviceNode.SUCCESS):
+                nonActive.append(device)
+        return nonActive
         
 
 if __name__=='__main__':

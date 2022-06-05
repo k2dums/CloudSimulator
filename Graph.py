@@ -8,8 +8,7 @@ class Graph():
         """
         This plots the bar graph for time vs various algorithms in definite setup
         """
-        print('names',names)
-        print('values',values)
+
         plt.bar(names,values,color='blue',width=0.4)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -41,7 +40,7 @@ class Graph():
         plt.show()
 
     
-    def lineGraph(legend_text, x:list,timeList:list[list[int]],title="Algorithms Time taken Vs Task Size",xlabel="No of Tasks",ylabel="Time Taken"):
+    def lineGraph(legend_text=[], x:list=[],timeList:list[list[int]]=[],title="Algorithms Time taken Vs Task Size",xlabel="No of Tasks",ylabel="Time Taken"):
         """
         Plots the graph 
         legend_text:list[string] the text that will be printed as label

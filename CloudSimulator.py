@@ -23,12 +23,12 @@ if __name__ == "__main__":
     #task size
     #network config
     # task=[taskA,taskB,taskC,taskD,taskE,taskF,taskG,taskH,taskI,taskJ,taskK,taskL]
-    algorithms=[Algorithm._RandomAllocation,Algorithm._GA,Algorithm._RoundRobin,Algorithm._WeightedRoundRobin]
-    namelist=["Random Allocation","Genetic Algorithm","Round-Robin","Weighted Round-Robin"]
-    taskSize=[200, 400, 600, 800, 1000, 1200]
+    algorithms=[Algorithm._WeightedRoundRobin,Algorithm._RoundRobin,Algorithm._RandomAllocation,Algorithm._GA]
+    namelist=["Weighted Round-Robin","Round-Robin","Random Allocation","Genetic Algorithm",]
+    taskSize=[100,200,300,400,500,600]
     network=Network()
-    # network.dummyNetwork()
-    network.createAndLayerSpecs()
+    network.dummyNetwork()
+    # network.createAndLayerSpecs()
     broker=Broker(network)
     # broker.setResourceList(task)
     timeList=[]
@@ -40,13 +40,19 @@ if __name__ == "__main__":
             broker.setResourceList(tasks)
             broker.resetTaskAllocated()
             broker.resourceAllocationAlgorithmStatic(algo)
-            time=broker.startSimulation()
+            time=broker.startStaticSimulation()
             timealgo.append(time)
         timeList.append(timealgo)
     
+    # broker.allDeviceStateSummary()
+    clusters=network.getNetworkLayers()[0]
+    clusters=clusters.getClusters()
+    # for cluster in clusters:
+    #     print(cluster.getActiveDeviceNo())
+    
     Graph.lineGraph(namelist,taskSize,timeList)
-    barplotx=[timeTaken[-1] for timeTaken in timeList]
-    Graph.plotBarGraph(values=barplotx,names=namelist)
+    # barplotx=[timeTaken[-1] for timeTaken in timeList]
+    # Graph.plotBarGraph(values=barplotx,names=namelist)
     print(timeList)
     # broker.AllDeviceStateSummary()
     print("\n\n")

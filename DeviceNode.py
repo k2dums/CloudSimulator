@@ -1,4 +1,5 @@
 #This class is modelled to have a generalized feature of a device 
+from http.client import PROCESSING
 from typing import Final
 class DeviceNode:
     __DEVICEID=0
@@ -9,8 +10,10 @@ class DeviceNode:
     FAILED:Final[int]=5
     PAUSED:Final[int]=7
     RESUMED:Final[int]=8
+    IDLE:Final[int]=9
+    PROCESSING:Final[int]=10
     FAILED_RESOURCE_UNAVAILABLE:Final[int]=9
-    def __init__(self,pp=2000,ram=4,memory=500,downloadR=100,uploadR=100,powerWatt=-1) -> None:
+    def __init__(self,pp=4000,ram=4,memory=500,downloadR=100,uploadR=100,powerWatt=-1) -> None:
         #this id correponds to the device\node 
         self.__deviceId:int=DeviceNode.__classSetDeviceId()
         #Milion intructions per sec
@@ -39,6 +42,7 @@ class DeviceNode:
         #self.__processors:int=processors
         #Tracks the task that has been finished
         self.__finishList=[]
+        self.__idleTime:int=0
     
     def __str__(self) -> str:
         return f'Device {self.__deviceId}'
@@ -109,6 +113,30 @@ class DeviceNode:
         return self.__powerWatt
     def getStatus(self):
         return self.__status
+    def getStatusText(self):
+        if self.__status==DeviceNode.CREATED:
+            return "CREATED"
+        elif self.__status==DeviceNode.READY:
+            return "READY"
+        elif self.__status==DeviceNode.QUEUED:
+            return "QUEUED"
+        elif self.__status==DeviceNode.SUCCESS:
+            return "SUCCESS"
+        elif self.__status==DeviceNode.FAILED:
+            return "FAILED"
+        elif self.__status==DeviceNode.PAUSED:
+            return "PAUSED"
+        elif self.__status==DeviceNode.RESUMED:
+            return "RESUMED"
+        elif self.__status==DeviceNode.IDLE:
+            return "IDLE"
+        elif self.__status==DeviceNode.PROCESSING:
+            return "PROCESSING"
+        elif self.__status==DeviceNode.FAILED_RESOURCE_UNAVAILABLE:
+            return "FAILED RESOURCE UNAVAILABLE"
+        else:
+            return "NA"
+
     def __setProcessingPower(self,pp:int):
         self.__processingPower=pp
     def __setInstructionLength(self,il):
@@ -126,8 +154,19 @@ class DeviceNode:
     def __setFinishTime(self,ft):
         self.__finishTime=ft
     def setResourceList(self,rl):
+        """
+        This appends the task to the device's resourcelist
+        """
         self.__resourceList.append(rl)
         self.setStatus(DeviceNode.READY)
+    def updateResourceList(self,tasks):
+        """
+        This directly updates the list of resources (task) in a device
+        While setResourceList() appends the task to the device resourceList
+        """
+        self.__resourceList=tasks
+        if len(self.__resourceList)<=0:
+            self.setStatus(DeviceNode.CREATED)
     def __setPowerWatt(self,pw:float):
         self.__powerWatt=pw
     def __setDeviceId(self,id):
@@ -137,6 +176,18 @@ class DeviceNode:
     def resetTask(self):
         self.__resourceList=[]
         self.setStatus(DeviceNode.CREATED)
+    def isThereTask(self):
+        if len(self.__resourceList)>0:
+            return True
+        return False
+    def setIdleTimet(self,time):
+        self.__idleTime=time
+    def appendIdleTime(self,time):
+        self.__idleTime+=time
+    def getIdleTime(self,time):
+        return self.__idleTime
+
+
 
 if __name__=='__main__':
     print(dir())

@@ -21,7 +21,7 @@ class Chromosome:
         return f'Chromosome {self.__id},Time {self.getTime()}'
     
     def __repr__(self) -> str:
-        return f'Chromosome {self.__id}'
+        return f'Chromosome {self.__id},'
         
 
     def viaLayercreateSection(self,devices):
