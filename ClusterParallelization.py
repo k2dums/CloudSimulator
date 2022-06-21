@@ -14,11 +14,11 @@ from Network import Network
 
 class ClusterParallelization:
     """
-    Class for allowing parallel Cluster simulation (simulating the processing of task in a device)
-    The device processing simulation is achieved by threads 
-    If there are 5 devices in the cluster, 5 threads representing 5 devices will be created
-    This provides concurrent simulation of the devices
-    It takes cluster object a parameter
+    Class for allowing parallel Cluster simulation (simulating the processing of task in a device)\n
+    The device processing simulation is achieved by threads \n
+    If there are 5 devices in the cluster, 5 threads representing 5 devices will be created\n
+    This provides concurrent simulation of the devices\n
+    It takes cluster object a parameter\n
     """
     id_pointer=0
     def __init__(self,clusterobj) -> None:
@@ -51,7 +51,7 @@ class ClusterParallelization:
                 #time to process in seconds
                 timetoprocess=task.getInstructionLength()/processingpower
                 #After sleeping the task  is said to be processed and completed
-                # print(f"\nDevice {deviceobj.getDeviceId()} will take {timetoprocess} seconds to complete task {task.getId()}")
+                print(f"\nDevice {deviceobj.getDeviceId()} will take {timetoprocess} seconds to complete task {task.getId()}")
                 deviceobj.setStatus(DeviceNode.PROCESSING)
                 time.sleep(timetoprocess)
                 deviceobj.setStatus(DeviceNode.SUCCESS)
@@ -67,7 +67,7 @@ class ClusterParallelization:
                 timeIdle=time.time()
             elif (deviceobj.getStatus()!=DeviceNode.IDLE) and ((time.time()-timeIdle)>=5):
                 deviceobj.setStatus(DeviceNode.IDLE)
-            time.sleep(3)
+            time.sleep(2)
 
 
     def clusterParallelization(self):
