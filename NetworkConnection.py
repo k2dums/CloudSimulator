@@ -1,9 +1,12 @@
-#This class is reponsible to keep a track of the cluster
-#which is connected to another cluster in another layer
-#Since a layer can have mulitple clusters ,therefore need to track
-#which cluster is connecting to which cluster between two layers
-from Layer import Layer,Cluster,np
+from Layer import Layer,Cluster
 class NetworkConnection:
+    """
+    This class is reponsible to keep a track of the cluster\n
+    which is connected to another cluster in another layer\n
+    Since a layer can have mulitple clusters ,therefore need to track\n
+    which cluster is connecting to which cluster between two layers\n
+    from Layer import Layer,Cluster,np\n
+    """
     def __init__(self,start,end,layerA,layerB) -> None:
         assert isinstance(layerA,Layer) and isinstance(layerB,Layer)
         self.__layerA=layerA
@@ -11,23 +14,13 @@ class NetworkConnection:
         self.__connection=np.zeros( ( layerA.getNoClusters(), layerB.getNoClusters() ) )
         self.makeConnection()
    
-    #this function makes the connection between clusters of two layers(adjacent)
+    
     def makeConnection(self):
+        """
+        this function makes the connection between clusters of two layers(adjacent)
+        """
         print(f"\nSetting up connection betweene Layer {self.__layerA.getId()} and Layer {self.__layerB.getId()}")
         print("[y] for Connection else [n]")                  
-        # for clusterA in range(self.__layerA_clusters):
-        #     for clusterB in range(self.__layerB_clusters):
-        #         print(f"Connection between Layer{self.__start}-Cluster {clusterA} and  Layer{self.__end}-Cluster {clusterB}")
-        #         userInput="None"
-        #         while not(userInput == "y") and not(userInput == "n"):
-        #             userInput=input()
-        #             if not(userInput=='y') and not(userInput=='n'):
-        #                 print("Error give a valid input")
-        #         assert userInput=='y' or userInput=='n'
-        #         if userInput=='y':
-        #             self.__connection[clusterA][clusterB]=1
-        #         elif userInput=='n':
-        #             self.__connection[clusterA][clusterB]=0
         layerA=self.__layerA
         layerB=self.__layerB
         assert isinstance(layerA,Layer)
@@ -53,10 +46,19 @@ class NetworkConnection:
         
     
     #Setters and getters for the NetworkConnection Class
-    def getFrom(self)->None:#Gets the id  of starting  layer
+    def getFrom(self)->None:
+        """
+        Gets the id  of starting  layer
+        """
         return self.__layerA.getId()
 
-    def getTo(self)->None:#Gets the id of  next layer
+    def getTo(self)->None:
+        """
+        Gets the id of  next layer
+        """
         return self.__layerB.getId()
-    def getNetworkConnection(self):#Returns the connection matrix between two layers 
+    def getNetworkConnection(self):
+        """
+        Returns the connection matrix between two layers 
+        """
         return self.__connection
