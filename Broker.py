@@ -1,5 +1,4 @@
-#This class is for allocating the resources and also is reponsible for the schdeduling algorithm used
-#It assigns the broker id to the device when allocating the resources to it
+
 
 from zmq import device
 from ClusterParallelization import ClusterParallelization
@@ -15,6 +14,12 @@ import time
 import tqdm
 import Graph
 class Broker:
+    """
+    Class that tracks the network\n
+    Also  for allocating the resources and also is reponsible for the scheduling algorithm used\n
+    Has a method to keep track of device status\n
+    It assigns the broker id to the device when allocating the resources to it\n
+    """
     __BROKER_ID=0
     __state=["CREATED","READY","QUEUED","SUCCESS","FAILED","PAUSED","RESUMED","FAILED_RESOURCE_UNAVAILABLE"]
 
@@ -49,12 +54,13 @@ class Broker:
         
     def setResourceList(self,resourceList:list):
         """
-        This sets the work that needs to be given to the Broker
+        Sets the work that needs to be given to the Broker
         """
         self.__resourceList=resourceList
         self.__seq_pointer=0
     
     def getBrokerId(self):
+        """Returns the broker id """
         return self.__brokerId
 
     def __getBrokerDeviceId(self)->str:
@@ -108,6 +114,7 @@ class Broker:
 
 
     def updateSeqPointer(self,value):
+        """Pointer responsible for keeping track of allocated jobs"""
         self.__seq_pointer=value
     def getActiveDeviceState(self):
         """
@@ -189,22 +196,33 @@ class Broker:
         return self.__algo
     
     def getUtilization(self):
+        """Gets the utilization of the overall network\n
+           Utilization of the network from the Network instance's method\n        
+        """
         network=self.__network
         assert isinstance(network,Network)
         return network.getUtilization()
     
     def getUtilizationPerLayer(self):
+        """Gets the utilization of the overall network\n
+           Utilization of the network from the Network instance's method\n        
+        """
         assert isinstance(self.__network,Network)
         return self.__network.getUtilzationPerLayer()
     
     def getUtilzationPerLayerPerCluster(self):
+        """Gets the utilization of each layer \n
+           Utilization of the network from the Network instance's method\n        
+        """
         assert isinstance(self.__network,Network)
         return self.__network.getUtilizationPerLayerPerCluster()*100
 
     def printUtilization(self):
+        """Prints the utilizaiton of the overall network"""
         print("Network Utilzation = ",self.getUtilization())
     
     def printUtilizationPerLayer(self):
+        """Prints the utilization of each layer """
         assert isinstance(self.__network,Network)
         print('\n')
         printStr="Network Utilization Per Layer".center(100," ")
@@ -214,6 +232,7 @@ class Broker:
             print(f"Layer {layer.getId()} Utilization: {layer.getUtilzation()*100}")
     
     def printUtilizationPerLayerPerCluster(self):
+        """Prints the utilization of each cluster in each layer"""
         assert isinstance(self.__network,Network)
         print('\n')
         printStr="Network Utilization Per Cluster Per Layer".center(100," ")
@@ -235,6 +254,9 @@ class Broker:
  
 
     def resourceAllocationAlgorithmStatic(self,algorithm=1):
+        """Allocates the task based on the Algorithm\n
+           if the allocation technique is dynamic,a thread needs to be associated while allocating\n
+        """
         if self.isResourceEmpty():
             print(f"No Tasks to allocate, but called {__name__}")
             return
@@ -245,6 +267,11 @@ class Broker:
 
 
     def printWeightNetwork(self):
+        """Prints the weight of the network\n
+           The weight of the network is based\n
+           on the processing power as of now
+        """
+
         if hasattr(self,'_Broker__algo'):
             assert isinstance(self.__algo,Algorithm)
             algorithm=self.__algo.getAlgorithm()
@@ -271,6 +298,9 @@ class Broker:
   
     
     def startStaticSimulation(self):
+        """Starts the simulation and calculates the time using arithmetic of job/processing_power\n
+           This simulation doesn't use any threading and parellization \n
+        """
         network=self.__network
         assert isinstance(network,Network)
         layer0=network.getNetworkLayers()[0]
@@ -295,6 +325,10 @@ class Broker:
 
 
     def resetTaskAllocated(self):
+        """
+        Resets the tasks allocated to the devices\n
+        Making the task queue of the device to empty\n
+        """
         assert isinstance(self.__network,Network)
         self.__network.resetTaskAllocated()
         self.__seq_pointer=0
@@ -302,6 +336,10 @@ class Broker:
 
     
     def setRoundRobinPointer(self,device:DeviceNode):
+        """Keeps a track of which device to allocate from and to\n
+           maintain  the flow of allocation during roundRobin\n
+           Calls the algorithm instance's setRoundRObinPointer method \n
+        """
         if hasattr(self,'_Broker__algo'):
             assert isinstance(self.__algo,Algorithm)
             self.__algo.setRoundRobinPointer(device)
@@ -312,15 +350,18 @@ class Broker:
         return len(self.__resourceList)
 
     def isResourceEmpty(self)->bool:
+        """Checks if the resources if empty"""
         if len(self.__resourceList)==0:
             return True
         if self.__seq_pointer>=self.getResourceLength():
             return True
         return False
     def getResourceList(self):
+        """Returns the task list from the broker instance"""
         return self.__resourceList
     
     def getNetwork(self):
+        """Returns the network instance associated with the broker"""
         return self.__network
     
     def ga_vs_lot(self):
@@ -343,7 +384,7 @@ class Broker:
         return self.__resourceList
         
 
-    def getDeviceStatusinfo(self,network,t=1,flag=False):
+    def getDeviceStatusinfo(self,network,t=0.3,flag=False):
        """ 
        Used with multithreading\n
        Function gets the Device Status info\n
@@ -400,7 +441,11 @@ class Broker:
 
 
     def startSimulation(self,result):
-        print("Starting Simulation")
+        """
+        Starts the simulation based on cluster Parallelizaion\n
+        it appends the results of the time taken by the simulation\n
+        """
+        print("[STARTING] Simulation")
         clusterThreads=[]
         clusterParallelobj=[]
         network=self.__network
@@ -438,20 +483,20 @@ class Broker:
         result.append((timeend-timestart))
        
         
-        print("\nEnding the Simulation")
+        print("\n[TERMINATING] Simulation")
 
 
 
     def startDynamicSimuation(self):
         """
-        This function creates Parallelization based on threads
-        Clusters run parallely using threads, concurrent execution of the cluster
-        Cluster Parallelizaiton is a class which allows device parallelziation in a cluster
-        as the devices in the cluster needs to run concurrently, for proper simulation
-        This is limited by the device specification as a big network will create lot of 
-        threads for the simulation of the network
+        This function creates Parallelization based on threads\n
+        Clusters run parallely using threads, concurrent execution of the cluster\n
+        Cluster Parallelizaiton is a class which allows device parallelziation in a cluster\n
+        as the devices in the cluster needs to run concurrently, for proper simulation\n
+        This is limited by the device specification as a big network will create lot of \n
+        threads for the simulation of the network\n
         """
-        print("Starting Dynamic Simulation")
+        print("[STARTING] Dynamic Simulation")
         clusterThreads=[]
         clusterParallelobj=[]
         network=self.__network
@@ -513,6 +558,9 @@ class Broker:
 
 
 class Algorithm:
+    """
+    A class for the allocation stratergies that can be used for the network\n
+    """
 
     _RoundRobin:int=1
     _COFFGA:int=2
@@ -533,7 +581,10 @@ class Algorithm:
 
     
     def resourceAllocation(self,algorithm=1):
-
+        """Method for allocting tasks based on an algorithm\n
+           Tells which algorithm to execute based on the class variable\n
+           associated with the algorithms
+        """
         self.__algorithm=algorithm
         if algorithm == Algorithm._RoundRobin:
             self.roundRobin()
@@ -556,11 +607,18 @@ class Algorithm:
 
 
     def setRoundRobinPointer(self,device:DeviceNode):
+        """Keeps a track of which device to allocate from and to\n
+            maintain  the flow of allocation during roundRobin\n
+        """
         self.__roundRobinPointer=device
 
 
-    #Need for a roundrobin pointer that tracks the last device that was set with taskc
+    #Need for a roundrobin pointer that tracks the last device that was set with tasks
     def roundRobin(self):
+        """Allocates the task based on Round Robin method\n
+           Allocation based on the serial no starting from the first to last \n
+           and then iterates again , until the all the task are allocated\n
+        """
         print("Allocating using Round Robin")
         network=self.__network
         assert isinstance(network,Network)  
@@ -570,22 +628,6 @@ class Algorithm:
         layers=network.getNetworkLayers()
         layer0=layers[0]
         assert isinstance(layer0,Layer)
-
-        # #Allocating Tasks only if the devices doesnt have any task
-        # def assignWhenPointerNone():  
-        #     assert isinstance(layer0,Layer)
-        #     # Enter if only when the roundRobin is None
-        #     if self.__roundRobinPointer is None:
-        #         for cluster in layer0.getClusters():
-        #             assert isinstance(cluster,Cluster)
-        #             for device in cluster.getDevices():
-        #                 assert isinstance(device,DeviceNode)
-        #                 if device.getStatus()==DeviceNode.CREATED:
-        #                     broker.assignLinearResources(device)
-        #                     broker.setRoundRobinPointer(device)
-        #                 if broker.isResourceEmpty():
-        #                     return
-        #     return #if roundRobinPointer not None
 
         #when roundrobinpinter is None : make isdevicefound=true
         #this removes the need for checking is roundrobinPointer is not None
@@ -627,6 +669,13 @@ class Algorithm:
   
     
     def weightedRoundRobin(self):
+        """Allocation based on weighted Round Robin \n
+           Weight is calculated based on the processing power of the cluster\n
+           Greater the weight more the task is allocated to the cluster\n
+           
+           Ex:  cluster 1 weight=1 ,cluster2  weight=2\n
+                cluster task is allocated twice the task to cluster 1\n
+        """
         print("Allocation using Weighted Round Robin")
         network=self.__network
         broker=self.__broker
@@ -637,8 +686,11 @@ class Algorithm:
         for cluster in firstLayer.getClusters():
             clusterList.append(cluster)
         
-        #Calculating the processing power per cluster and finding the minimum processing power in a cluster
+      
         def calculateWeight():
+            """
+            Calculating the processing power per cluster and finding the minimum processing power in a cluster
+            """
             minimum=-1
             for cluster in clusterList:
                 assert isinstance(cluster,Cluster)
@@ -652,13 +704,15 @@ class Algorithm:
                     minimum=processingPower
                 cluster.setWeight(processingPower)
 
-            #We set the weight (processing power /minimum processing power)
             for cluster in clusterList:
+                """
+                Set the weight (processing power /minimum processing power)
+                """
                 assert isinstance(cluster,Cluster)
                 cluster.setWeight(round(cluster.getWeight()/minimum))
 
         def sortingClusterbyWeight():
-        #Sorting of cluster based on cluster weight
+            """ Sorting of cluster based on cluster weight """
             for i in range(len(clusterList)):
                 for j in range(i+1,len(clusterList)):
                     if clusterList[i].getWeight()<clusterList[j].getWeight():
@@ -675,7 +729,7 @@ class Algorithm:
             
 
         def assignTask():
-        #Assigning of task based on weight
+            """Assigning of task based on weight"""
             while( not(broker.isResourceEmpty())):
                 for cluster in clusterList:
                     assert isinstance(cluster,Cluster)
@@ -716,6 +770,10 @@ class Algorithm:
 
     
     def randomAllocation(self):
+        """Allocation of the task based randomly\n
+           First gets a random cluster then gets \n
+           a random device in that cluster and allocates\n
+        """
         print("Allocation using Random Allocation ")
         network=self.__network
         broker=self.__broker
@@ -754,6 +812,12 @@ class Algorithm:
             pass
     
     def ga(self,gernerationLimit:int=20,lotsize=10,test=False):
+        """Allocation based on Genetic algorithm (GA)\n
+           GA gets the random population,mutates ,then undergeoes\n
+           selection and then new poplulation is selected\n
+           
+           takes generation limit and lot size as parameter\n
+        """
         print("Allocation using Genetic Algorithm ")
         broker=self.__broker
         assert isinstance(broker,Broker)
@@ -765,8 +829,12 @@ class Algorithm:
         len_clusters=len(clusters)
         processingTime=0
         allocatingList=[]
-        #prints the number of task allocated to a device in a section
+        
+
         def printChromosomeCounter(chromosomes):
+            """
+            Prints the number of task allocated to a device in a section
+            """
             for chromosome in chromosomes:
                 assert isinstance(chromosome,Chromosome)
                 print("Chromosome",chromosome.getId())
@@ -782,8 +850,12 @@ class Algorithm:
                         datasection.append(taskcounter)
                     data.append(datasection)
                 print(data)
-        #prints the the task obj details in the device of a section
+     
+
         def printChromosomeTaskId(chromosomes):
+            """
+               prints the the task obj details in the device of a section
+            """
             for chromosome in chromosomes:
                 assert isinstance(chromosome,Chromosome)
                 print("Chromosome",chromosome.getId())
@@ -797,8 +869,12 @@ class Algorithm:
                             datasection.append(task.getId())
                     data.append(datasection)
                 print(data)       
-        #generates a sample size of chromosomes
+       
+
         def generateRandomChromosomes(no=lotsize):
+            """
+             generates a sample size of chromosomes
+            """
             # print("Generating pool of random Chromosome")
             chromosomeList=[]
             #Chromosome is network equivalent,section is cluster equivalent,unit is device equivalent
@@ -813,8 +889,11 @@ class Algorithm:
                     randomUnit.setTask(task)
                 chromosomeList.append(chromosome)
             return chromosomeList
-        #Function for calculating the time taken for the allocation stratergy of the encoded chromosome
+       
         def calculateChromosome(chromosomeList):
+            """
+            Function for calculating the time taken for the allocation stratergy of the encoded chromosome
+            """
             network=Network()
             network.copyNetwork(self.__network)
             tempbroker=Broker(network)
@@ -825,8 +904,11 @@ class Algorithm:
                 time=tempbroker.startStaticSimulation()
                 chromosome.setTime(time)
 
-        #Function for that mutates the chromosome with mutation and crossover operators
+
         def mutatation(chrmoList)->list[list[int]]:
+            """
+            Function for that mutates the chromosome with mutation and crossover operators
+            """
             chromosomes=[]
             for chrmo in chrmoList:
                 assert isinstance(chrmo,Chromosome)
@@ -834,8 +916,11 @@ class Algorithm:
                 chromosomes.append(chrmoObj)
             
             
-            #swaps a allocated task if any with another task if any within a chromosome
+            
             def crossover():
+                """
+                swaps a allocated task if any with another task if any within a chromosome
+                """
                 # print("Undergoing crossover of the Chromosome")
                 crossoverRange=4
                 for chromosome in chromosomes:
@@ -883,8 +968,11 @@ class Algorithm:
                             randomUnit_B.setTask(randomTask_A)
                 # print("Crossover Complete")
 
-            #with a probabilty of 25% chance of deleting a task from a device and adding it to another device within a chromosome
+          
             def mutate():
+                """
+                  With a probabilty of 25% chance of deleting a task from a device and adding it to another device within a chromosome
+                """
                 # print("Undergoing mutation of the Chromosome")
                 mutateRange=3
                 for chromosome in chromosomes:
@@ -922,8 +1010,11 @@ class Algorithm:
             return chromosomes
             #end of muatation()
         
-        #Merging the child and parent chromosome 
+    
         def mergePopulation(parent:list[Chromosome],child:list[Chromosome]):
+            """
+            Merging the child and parent chromosome 
+            """
             chromosomes=[]
             chromosomes.extend(parent)
             chromosomes.extend(child)
@@ -933,6 +1024,10 @@ class Algorithm:
 
         
         def binaryTournamentSelection(poption):
+            """Selection based on binary tournament selction \n
+               Random pair of chromosomes are selected and the better one is the winner\n
+               The winners of each pair battle is returned\n
+            """
             population=copy.deepcopy(poption)
             survival=[]
             if len(population)<2:
@@ -968,6 +1063,9 @@ class Algorithm:
             return survival
 
         def nSelect(survivors,size=lotsize):
+            """Selects the surviours based on lot size, it the best of the \n
+                survivours that fills the lotsize\n            
+            """
             selected=[]
             #Swapping
             for i in range(len(survivors)):
@@ -987,14 +1085,6 @@ class Algorithm:
         parentChromosomes=generateRandomChromosomes()
         calculateChromosome(parentChromosomes)
         selected=[]
-        # print("\n \nParent Chromosomes")
-        # for x in parentChromosomes:
-        #     print(x)
-        # print('Task ID')
-        # printChromosomeTaskId(parentChromosomes)
-        # print('\n')
-        # print('task Counter')
-        # printChromosomeCounter(parentChromosomes)
         generation=0
         if test==False:
             while (generation < gernerationLimit):
@@ -1039,6 +1129,7 @@ class Algorithm:
             return lotlist,timelister
     
     def getHighestProcessingPower(self,devices:list[DeviceNode]):
+        """Gets the highest processing power from the list of the devices"""
         if len(devices)<=0:
             # print(f"Error: TraceBack {__name__}: No list Given")
             return None
@@ -1055,9 +1146,9 @@ class Algorithm:
 
     def dynamicAlgorithm(self,brokerSleep=5):
         """
-        Algorithm initially allocates a task to the first available device(based on the highest processing power available)
-        When all the devices are occupied , it then checks for the first available device after completing the task.
-        If free is allocated with another task
+        Algorithm initially allocates a task to the first available device(based on the highest processing power available)\n
+        When all the devices are occupied , it then checks for the first available device after completing the task.\n
+        If free is allocated with another task\n
         """
         print("Allocating using Dynamic Algorithm")
         broker=self.__broker
@@ -1084,31 +1175,14 @@ class Algorithm:
                 print(f"Broker has no task list , Sleeping for {brokerSleep}")
                 time.sleep(brokerSleep)
             
-
-            
-
-        # #Creating Cluster Parallelization object
-        # for cluster in clusters:
-        #     cluster_Pobj=ClusterParallelization(cluster)
-        #     clusterParallelobj.append(cluster_Pobj)
-
-        # #Assigning each clusterParallelization object to a thread, allows each cluster
-        # #to have concurrent execution
-        # for cluster in clusterParallelobj:
-        #     assert isinstance(cluster,ClusterParallelization)
-        #     thread=Thread(target=cluster.clusterParallelization)
-        #     clusterThreads.append(thread)
-        #Here we add another thread to check if the broker has task 
-        #if so we allocate the task using a given allocatino algorithm
-
-        #we add another thread to take dynamic input 
-        #like keep adding task 
-        # for thread in clusterThreads:
-        #     thread.start()
-        # for thread in clusterThreads:
-        #     thread.join()
         allocate()
+
+
+
     def getAlgorithm(self):
+        """
+        Returns the algorithm (the value associated with the class variable such as Algorithm.__RoundRobin)\n
+        """
         return self.__algorithm
 
 
@@ -1116,6 +1190,7 @@ class Algorithm:
 
             
 def getTaskleft(cluster):
+    """Prints the task left in a device queue of the devices in a  cluster"""
     assert isinstance(cluster,Cluster)
     print("\nGetting Task left info")
     while(True):
@@ -1155,39 +1230,38 @@ if __name__=="__main__":
     # t1.join()
     # t2.join()
 
-    # network=Network()
-    # network.dummyNetwork()
-    # clusterThreads=[]
-    # clusterParallelobj=[]
-    # assert isinstance(network,Network)
-    # layer0=network.getNetworkLayers()[0]
-    # assert isinstance(layer0,Layer)
-    # clusters=layer0.getClusters()
-    # broker=Broker(network)
-    # tasks=TaskGenerator.generatenoTask(20)
-    # broker.setResourceList(tasks)
-    # broker.resourceAllocationAlgorithmStatic(Algorithm._WeightedRoundRobin)
-    # broker.allDeviceStateSummary()
-    # input('Press Enter to start')
-    # #Creating ClusterParallelization object
-    # for cluster in clusters:
-    #     cluster_Pobj=ClusterParallelization(cluster)
-    #     clusterParallelobj.append(cluster_Pobj)
-    # #Assigning each clusterParallelization object to a thread, allows each cluster
-    # #to have concurrent execution
-    # for cluster in clusterParallelobj:
-    #     assert isinstance(cluster,ClusterParallelization)
-    #     thread=Thread(target=cluster.clusterParallelization)
-    #     clusterThreads.append(thread)
-    # t1=Thread(target=broker.getDeviceStatusinfo,args=(network,1,True))
-    # for thread in clusterThreads:
-    #     thread.start()
-    # t1.start()
-    # for thread in clusterThreads:
-    #     thread.join()
-    # t1.join()
-    # broker.assignLinearResources()
+    network=Network()
+    network.dummyNetwork()
+    clusterThreads=[]
+    clusterParallelobj=[]
+    assert isinstance(network,Network)
+    layer0=network.getNetworkLayers()[0]
+    assert isinstance(layer0,Layer)
+    clusters=layer0.getClusters()
+    broker=Broker(network)
+    tasks=TaskGenerator.generatenoTask(20)
+    broker.setResourceList(tasks)
+    broker.resourceAllocationAlgorithmStatic(Algorithm._WeightedRoundRobin)
+    broker.allDeviceStateSummary()
+    input('Press Enter to start')
+    #Creating ClusterParallelization object
+    for cluster in clusters:
+        cluster_Pobj=ClusterParallelization(cluster)
+        clusterParallelobj.append(cluster_Pobj)
+    #Assigning each clusterParallelization object to a thread, allows each cluster
+    #to have concurrent execution
+    for cluster in clusterParallelobj:
+        assert isinstance(cluster,ClusterParallelization)
+        thread=Thread(target=cluster.clusterParallelization)
+        clusterThreads.append(thread)
+    t1=Thread(target=broker.getDeviceStatusinfo,args=(network,1,True))
+    for thread in clusterThreads:
+        thread.start()
+    t1.start()
+    for thread in clusterThreads:
+        thread.join()
+    t1.join()
+    broker.assignLinearResources()
 
-    print(dir(Algorithm.dynamicAlgorithm))
 
 
