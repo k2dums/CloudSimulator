@@ -1,6 +1,10 @@
 from Chromosome import Chromosome
 class ChromosomeCopy:
-      def copy(chromosome:Chromosome):
+    """
+    Class is used to copy a chromsome instance and return that copied instance\n
+    """
+    def copy(chromosome:Chromosome):
+        """Copies the Chromosome instance and returns another copied instance of the Chromosome instance"""
         copy=Chromosome()
         assert isinstance(chromosome,Chromosome)
         for section in chromosome.getSections():
