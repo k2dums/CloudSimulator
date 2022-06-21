@@ -43,19 +43,13 @@ if __name__ == "__main__":
             time=broker.startStaticSimulation()
             timealgo.append(time)
         timeList.append(timealgo)
-    
-    # broker.allDeviceStateSummary()
-    clusters=network.getNetworkLayers()[0]
-    clusters=clusters.getClusters()
-    # for cluster in clusters:
-    #     print(cluster.getActiveDeviceNo())
-    
+    print("\n\n")
+    print(timeList)
     Graph.lineGraph(namelist,taskSize,timeList)
     # barplotx=[timeTaken[-1] for timeTaken in timeList]
     # Graph.plotBarGraph(values=barplotx,names=namelist)
-    print(timeList)
-    # broker.AllDeviceStateSummary()
-    print("\n\n")
+ 
+   
 
 
   
