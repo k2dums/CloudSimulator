@@ -18,6 +18,8 @@
 -	[ ] Probability of device shutting down  
 -	[ ] Reallocation of the resources to another device in cluster or to a next cluster
 -	[ ] Calculating the latency(Bandwidth between the layers, clusters, devices)
+-   [ ] Using latency and memory characteristics of a device
+-   [ ] Objective function using energy consumption 
 
 ## Datastructures used in various Classes
 
