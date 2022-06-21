@@ -1,14 +1,15 @@
-#Layer Connection matrix  is used for the connection between clusters 
-#The LayerId static variable needs to be part of the Network class
+
 
 import numpy as np
 from Cluster import Cluster,DeviceNode,Mobile,Station
 
 
 
-
-
 class Layer:
+    """
+    Layer Connection matrix  is used for the connection between clusters \n
+    The LayerId static variable needs to be part of the Network class\n
+    """
     def __init__(self,layerId) -> None:
         self.__layerId=layerId
         self.__clusters=[]
@@ -22,35 +23,44 @@ class Layer:
         return f'Layer {self.__layerId}'
         
     
-    #This is  for  getting  inital input for the number of cluster,devices and stations
+
     def inputData(self):
+        """
+            This is  for  getting  inital input for the number of cluster,devices and stations
+        """
         print("\n")
         print(f"Layer-{self.__layerId} Config")
         self.askCluster()
         self.deviceSpecInLayer()
    
     def askCluster(self):
+        """Asks the number of cluster in that layer to be added """
         noOfClusters=int(input(f"Give the number of Clusters in Layer-{self.__layerId} : "))
         for i in range(noOfClusters):
             self.addCluster()
            
 
         
-    #Creating of n number of  Cluster in a Layer
+    
     def addCluster(self):
+            """Creating of n number of  Cluster in a Layer"""
             cluster=Cluster(self.setClusterId())
             self.__clusters.append(cluster)
             return cluster
             
 
     def deviceSpecInLayer(self):
-        user=input(f"'y' for Standard Specification for the device,else 'n' for manual specification : ").lower()
-        while user !='y' and user !='n':
+        """Specification for the device such as standard or manual\n
+           for standard all the default arguments will be given\n
+           while manual , needs to set the device characterstics\n
+        """
+        standard_spec=input(f"'y' for Standard Specification for the device,else 'n' for manual specification : ").lower()
+        while standard_spec!='y' and standard_spec !='n':
             print("Error:Invalid User Input")
-            user=input(f" 'y' for Standard Specification for the device,else manual specification,else 'n' : ").lower()
+            standard_spec=input(f" 'y' for Standard Specification for the device,else manual specification,else 'n' : ").lower()
 
         #For standard specification for the device
-        if user == 'y':
+        if standard_spec == 'y':
             for cluster in self.__clusters:
                 assert isinstance(cluster,Cluster)
                 n_devices=int(input(f"Give the number of Devices in Cluster-{cluster.getId()}-Layer {self.__layerId} : "))
@@ -58,12 +68,12 @@ class Layer:
                     cluster.addDevice()
 
         #For manual specification for the device
-        elif user == 'n':
+        elif standard_spec == 'n':
             self.setisStandard(False)
-            temp=input("'y' for a  detailed specification, else 'n' : ").lower()
-            while temp !='y' and temp !='n':
+            detailed_spec=input("'y' for a  detailed specification, else 'n' : ").lower()
+            while detailed_spec !='y' and detailed_spec!='n':
                 print("Error:Invalid User Input")
-                temp=input("'y' for a detailed specification, else 'n' : ").lower()
+                detailed_spec=input("'y' for a detailed specification, else 'n' : ").lower()
 
             for cluster in self.__clusters:
                 assert isinstance(cluster,Cluster)
@@ -71,27 +81,27 @@ class Layer:
 
                 for i in range(n_devices):
                     print(f"Specs for Device {i} in Cluster {cluster.getId()}-Layer {self.getId()}")
-                    user=input(f"if device Mobile give 'm', Device give 'd', Station give 's' : ").lower()
-                    while  user!='s' and  user!='d' and  user!='m':
+                    device_type=input(f"if device Mobile give 'm', Device give 'd', Station give 's' : ").lower()
+                    while  device_type!='s' and  device_type!='d' and  device_type!='m':
                         print("Error:Invalid Input from User")
                         print(f"if device Mobile give 'm', Device give 'd', Station give 's' : ")
-                        user=input().lower()
+                        device_type=input().lower()
                   
-                    if user == 'd':
+                    if device_type == 'd':
                         device=cluster.addDevice()
                         assert isinstance(device,DeviceNode)
-                        if temp=='y':
+                        if detailed_spec=='y':
                             device.setSpecification()
                             
-                    elif user == 's':
+                    elif device_type == 's':
                         station=cluster.addStation()
                         assert isinstance (station,Station)
-                        if temp=='y':
+                        if detailed_spec=='y':
                             station.setSpecification()
-                    elif user == 'm':
+                    elif device_type == 'm':
                         mobile=cluster.addMobile()
                         assert isinstance(mobile,Mobile)
-                        if temp=='y':
+                        if detailed_spec=='y':
                             mobile.setSpecification()
 
 
@@ -121,16 +131,22 @@ class Layer:
 
 
 
-    #Was used for debugging to print the layer charactersitics
+ 
     def printAbstractData(self):
+        """
+        Was used for debugging to print the layer charactersitics
+        """
         print('layer id',self.__layerId)
         print("No of Clusters",len(self.__clusters))
         print('utilzation',self.__utilzation)
         print("Utilization per cluster ",self.__utilzationPerCluster)
 
     
-    #Prints the summary details of all the device in a particular layer
+  
     def printLayerSummary(self):
+        """
+        Prints the summary details of all the device in a particular layer
+        """
         print("\n")
         print(f"Layer-{self.__layerId} Summary".center(100," "))
         print(f"Device Id".center(20," ")+"|"+f"Processing Power".center(20," ")+"|"+f"WattUsage".center(20," ")+"|"+f"Battery".center(20," ")+"|"+f"Type".center(20," "))
@@ -160,15 +176,20 @@ class Layer:
 
     #The setter and getter for the attributes of the Layer class
     def getId(self):
+        """Returns the layer id"""
         return self.__layerId
     def setClusterId(self):
+        """Sets the cluster id , this id is passed during cluster initialzation"""
         self.updateClusterId()
         return self.__clusterId-1
     def getClusters(self)->list[Cluster]:
+        """Returns the list of cluster instances"""
         return self.__clusters
     def getNoClusters(self):
+        """Returns the number of cluster in the layer"""
         return len(self.__clusters)
     def getUtilzation(self):
+        """Returns the utiliatioln of the cluster"""
         temp=0
         n=len(self.__clusters)
         for cluster in self.__clusters:
@@ -177,21 +198,27 @@ class Layer:
         utilzation=temp/n
         return utilzation
     def getUtilizationPerCluster(self):
+        """Returns the utilizaiton per cluster in a layer """
         utilizationPerCluster=[]
         for cluster in self.__clusters:
             assert isinstance(cluster,Cluster)
             utilizationPerCluster.append(cluster.getUtilization())
         return utilizationPerCluster
     def setWeight(self,weight):
+        """Sets the weight of the layer"""
         self.__weight=weight
         return self.__weight
     def getWeight(self):
+        """Gets the weight of the layer"""
         return self.__weight
     def updateClusterId(self):
+        """Updates the cluster id, by incrementing by 1"""
         self.__clusterId+=1
     def getisStandard(self):
+        """Returns true, if the specification was set in standard else False"""
         return self.__isStandard
     def setisStandard(self,flag:bool):
+        """Sets the varaible isStandard to the flag"""
         self.__isStandard=flag
         
         
@@ -200,6 +227,9 @@ class Layer:
 
    
     def dummyCluster(self):
+        """Creates teh dummy cluster for testing purpose\n
+           Creates 3 cluster and adds 3 devices to each cluster\n
+        """
         cluster1=Cluster(0)
         cluster2=Cluster(1)
         cluster3=Cluster(2)
