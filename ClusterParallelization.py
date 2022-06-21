@@ -33,11 +33,11 @@ class ClusterParallelization:
 
     def deviceParallelization(self,deviceobj):
         """
-        Function helps to simulate the devices and the task it needs to process simulate
-        Say the task is 40000 Million instruction , and if the device has processing power
-        of 4000 MIPS , then the device completes the task in 10 sec, this is simulated by making the 
-        thread sleep for 10 sec and then processing the task to be completed by updating the resourceList 
-        of the device
+        Function helps to simulate the devices and the task it needs to process simulate\n
+        Say the task is 40000 Million instruction , and if the device has processing power\n
+        of 4000 MIPS , then the device completes the task in 10 sec, this is simulated by making the\n 
+        thread sleep for 10 sec and then processing the task to be completed by updating the resourceList\n 
+        of the device\n
         """
         assert isinstance(deviceobj,DeviceNode)
         print(f"\nStarting Device {deviceobj.getDeviceId()} Parallelization ")
@@ -72,8 +72,8 @@ class ClusterParallelization:
 
     def clusterParallelization(self):
         """
-        Helps in parallizaion of the cluster where the devices  in the cluster needs
-        to have concurrent processing simulation
+        Helps in parallizaion of the cluster where the devices  in the cluster needs\n
+        to have concurrent processing simulation\n
         """
         self.stopParallelization_Flag=False
         assert isinstance(self.clusterobj,Cluster)
@@ -97,7 +97,7 @@ class ClusterParallelization:
     
     def taskCheck(self):
         """
-            Return True if task is there in the cluster associated with the clusterParallizaiton object
+            Return True if task is there in the cluster associated with the clusterParallizaiton object\n
         """
         return self.clusterobj.isThereTask()
 
