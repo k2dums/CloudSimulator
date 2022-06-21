@@ -1,6 +1,13 @@
-#This class tells the requiste for the task that needs to be executed
+
 from typing import Final
+
 class Task:
+    """
+    Class is an abstraction for a real world task\n
+    This class tells the requiste for the task that needs to be executed\n
+    Every task such as email, browsing or other such tasks can inherit this class and create a requiste \n
+    for the execution of that task\n
+    """
     TASK_ID=0
     CREATED:Final[int]=0
     READY:Final[int]=1
@@ -13,7 +20,7 @@ class Task:
     RESUMED:Final[int]=8
     FAILED_RESOURCE_UNAVAILABLE:Final[int]=9
 
-    def __init__(self,reqDevice=-1,taskName="",instrn_length=40000,fileSize=0,outputSize=0) -> None:
+    def __init__(self,reqDevice=-1,taskName="",instrn_length=4000,fileSize=0,outputSize=0) -> None:
         if taskName=="":
             taskName=str(Task.TASK_ID)
         self.id=Task.TASK_ID
@@ -41,32 +48,38 @@ class Task:
         Task.TASK_ID+=1
 
     def getInstructionLength(self):
+        """Returns the instruction length of the task"""
         return self.__InstructionLength
     
     def getId(self):
+        """Returns the id of the task"""
         return self.id
 
 
 def smallTask():
     """
-    Function returns a task object
-    The task object has instruction length 4000
+    Function returns a task object\n
+    The task object has instruction length 4000\n
     """
     task=Task()
-    return Task
+    return task
 
 def mediumTask():
     """
-    Function returns a task object 
-    The task object has an instruction length of 10,000
+    Function returns a task object \n
+    The task object has an instruction length of 10,000\n
     """
     task=Task(instrn_length=10000)
     return task
+    
 
 def largeTask():
     """
-    Function returns a task object
-    The task object has an instruction length of 40,000
+    Function returns a task object\n
+    The task object has an instruction length of 40,000\n
     """
     task=Task(instrn_length=40000)
     return task
+
+if __name__=="__main__":
+    pass
