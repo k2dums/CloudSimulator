@@ -1,6 +1,4 @@
-#This class keeps a track of all the layer created 
-#The layer object manipulated here
-#This class also makes the connection between the the cluster of the a layer and cluster of different layer
+
 
 from NetworkConnection import NetworkConnection
 from Layer import Layer,Cluster,DeviceNode,Mobile,Station,np
@@ -8,6 +6,11 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style
 class Network:
+    """
+    This class keeps a track of all the layer created \n
+    The layer object manipulated here\n
+    This class also makes the connection between the the cluster of the a layer and cluster of different layer\n
+    """
     #Statiac variable to track the network id
     __NETWORK_ID=0
     #The layerid needs to be passed during the creation of a layaer and updated likewise
@@ -22,24 +25,32 @@ class Network:
     
     
     def createAndLayerSpecs(self):
+        """Creates the layer and asks for the specification of the layer"""
         n_layers=int(input("Give the number of Network Layers : "))
         for i in range (n_layers):
             self.createLayer()
         self.layerSpecs()
-    #This creates a network object put inside  list to keep a track of the layers in a network
+  
     def createLayer(self):
+        """
+          This creates a network object put inside  list to keep a track of the layers in a network\n
+        """
         layer=Layer(self.__getLayerId())
         self.__updateLayerId()
         self.__networkLayers=np.append(self.__networkLayers,layer)
         return layer
+
     def layerSpecs(self):
+        """Asks the specification for the layer"""
         for layer in self.__networkLayers:
             assert isinstance(layer,Layer)
             layer.inputData()
             return
     
-    #This prints the all layer in a network and its  summary including the clusters and its devices 
     def printAllLayerSummary(self):
+        """
+        This prints the all layer in a network and its  summary including the clusters and its devices\n
+        """
         if len(self.__networkLayers)==0:
             print("Error:Printing Layer Summary {Zero Layers Present}")
             return 
@@ -49,8 +60,9 @@ class Network:
             assert isinstance(layer,Layer)
             layer.printLayerSummary()
 
-    #This prints the layer summary of a particular network 
+  
     def printLayerSummary(self,layerNo=0):
+        """  This prints the layer summary of a particular network """
         if len(self.__networkLayers)==0:
             print("Error:Printing Layer Summary {Zero Layers Present}")
             return 
@@ -62,9 +74,12 @@ class Network:
             if layer.getId()==layerNo:
                 layer.printLayerSummary()
     
-    #Sets the connection between layers in a network
-    #Connection are allowed only between adjacent layer
+   
     def makeLayerConnections(self):
+        """
+         Sets the connection between layers in a network\n
+         Connection are allowed only between adjacent layer\n
+        """
         if len(self.__networkLayers)==1:
             print("There is only one layer,no network connection created")
             return
@@ -88,6 +103,7 @@ class Network:
             self.__connectionMatrix.append(layerconnection)
         
     def getUtilization(self):
+        """Returns  the  overall utiilization for the network """
         utilization=0
         layers=self.getNetworkLayers()
         n_layers=len(layers)
@@ -98,6 +114,7 @@ class Network:
         return utilization
 
     def getUtilzationPerLayer(self):
+        """Returns the utilization of each layer in the network"""
         utilizationPerLayer=[]
         layers=self.getNetworkLayers()
         for layer in layers:
@@ -106,6 +123,7 @@ class Network:
         return utilizationPerLayer
     
     def getUtilizationPerLayerPerCluster(self):
+        """Returns the utilization of each cluster of each layer in a"""
         layers=self.getNetworkLayers()
         networkUtilization=[]
         for layer in layers:
@@ -126,9 +144,12 @@ class Network:
     #         assert isinstance(layer,Layer)
     #         layer.makeClusterConnection()
     
-    #Plots the overall network with all the layer and its respective cluster
-    #Omits the cluster connection within a layer
+   
     def visualizeNetwork(self)->None:
+        """
+         Plots the overall network with all the layer and its respective cluster\n
+         Omits the cluster connection within a layer\n
+        """
         style.use("fivethirtyeight")
         layers=self.getNetworkLayers()
         # no_ofLayers=network.getNumberofLayers()
@@ -204,9 +225,9 @@ class Network:
     
     def dummyNetwork(self):
         """
-        Function creates a layer (one layer)
-        Adds 3 cluster each having 3 devices
-        Since the device is created in Standard the ProcessingPower=4000
+        Function creates a layer (one layer)\n
+        Adds 3 cluster each having 3 devices\n
+        Since the device is created in Standard the ProcessingPower=4000\n
         """
         self.createLayer()
         layer0=self.getNetworkLayers()[0]
@@ -214,6 +235,7 @@ class Network:
         layer0.dummyCluster()
     
     def copyNetwork(self,network):
+        """Copies the network configuraition of the network passed as parameter"""
         for layer in network.getNetworkLayers():
             assert isinstance(layer,Layer)
             _layer=self.createLayer()
@@ -259,18 +281,25 @@ class Network:
 
     
     def __getLayerId(self)->int:
+        """Returns the layer id of the network"""
         return self.__layerId
     def __updateLayerId(self)->None:
+        """Updates the layer id, this is passed during layer initiatlization"""
         self.__layerId+=1
     def getNetworkLayers(self)->list[Layer]:
+        """Returns the list of network layers instances"""
         return self.__networkLayers
     def getConnectionMatrix(self):
+        """Returns the connection Matrix """
         return self.__connectionMatrix
     def getNumberofLayers(self)->int:
+        """Returns the number of layers in network"""
         return len(self.__networkLayers)
     def getNewtworkId(self)->int:
+        """Returns the network id """
         return self.__networkId
     def resetTaskAllocated(self):
+        """Resets the task allocated the devices in the network"""
         if not(self.getNetworkLayers()):
             return
         if self.getNumberofLayers()<=0:
