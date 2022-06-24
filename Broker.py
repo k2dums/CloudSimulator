@@ -1,6 +1,4 @@
 
-
-from zmq import device
 from ClusterParallelization import ClusterParallelization
 from Network import Network,Layer,Cluster,DeviceNode,Mobile,Station
 from Task import Task
@@ -11,7 +9,6 @@ from Chromosome import Chromosome
 from ChromosomeCopy import ChromosomeCopy
 from threading import Thread
 import time
-import tqdm
 import Graph
 class Broker:
     """
@@ -472,14 +469,14 @@ class Broker:
         #we add another thread to take dynamic input 
         #like keep adding task 
         t1=Thread(target=self.check_Update_Parallelization,args=(clusterParallelobj,self.isResourceEmpty))
-        timestart=time.time()
+        timestart=time.perf_counter()
         for thread in clusterThreads:
             thread.start()
         t1.start()
         for thread in clusterThreads:
             thread.join()
         t1.join()
-        timeend=time.time()
+        timeend=time.perf_counter()
         result.append((timeend-timestart))
        
         
