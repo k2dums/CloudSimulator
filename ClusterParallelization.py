@@ -1,8 +1,5 @@
 
 from threading import Thread
-from tracemalloc import start
-
-from zmq import device
 from TaskGenerator import TaskGenerator
 from Task import Task
 from Cluster import Cluster
@@ -11,6 +8,8 @@ from Mobile import Mobile
 from Station import Station
 import time
 from Network import Network
+import LogFile
+
 
 class ClusterParallelization:
     """
@@ -20,6 +19,7 @@ class ClusterParallelization:
     This provides concurrent simulation of the devices\n
     It takes cluster object a parameter\n
     """
+
     id_pointer=0
     def __init__(self,clusterobj) -> None:
         self.id=ClusterParallelization.id_pointer
@@ -39,8 +39,9 @@ class ClusterParallelization:
         thread sleep for 10 sec and then processing the task to be completed by updating the resourceList\n 
         of the device\n
         """
+     
         assert isinstance(deviceobj,DeviceNode)
-        print(f"\nStarting Device {deviceobj.getDeviceId()} Parallelization ")
+        print(f"\n[STARTING] Device {deviceobj.getDeviceId()} Parallelization")
         processingpower=deviceobj.getProcessingPower()
         timeIdle=-1
         while(not(self.stopParallelization_Flag)):
@@ -64,10 +65,11 @@ class ClusterParallelization:
                     tasks=tasks[1:len(tasks)]
                     deviceobj.updateResourceList(tasks)
             if timeIdle==-1:
-                timeIdle=time.time()
-            elif (deviceobj.getStatus()!=DeviceNode.IDLE) and ((time.time()-timeIdle)>=5):
+                timeIdle=time.perf_counter()
+            elif (deviceobj.getStatus()!=DeviceNode.IDLE) and ((time.perf_counter()-timeIdle)>=5):
                 deviceobj.setStatus(DeviceNode.IDLE)
-            time.sleep(2)
+            #if no task in the device , check after a while
+            time.sleep(0.1)
 
 
     def clusterParallelization(self):
@@ -75,9 +77,10 @@ class ClusterParallelization:
         Helps in parallizaion of the cluster where the devices  in the cluster needs\n
         to have concurrent processing simulation\n
         """
+    
         self.stopParallelization_Flag=False
         assert isinstance(self.clusterobj,Cluster)
-        print(f"\nStarting Cluster Parallelization {self.clusterobj.getId()}")
+        print(f"\n[STARTING] Cluster Parallelization {self.clusterobj.getId()}")
         cluster=self.clusterobj
         assert isinstance(cluster,Cluster)
         devices=cluster.getDevices()
@@ -86,10 +89,11 @@ class ClusterParallelization:
             self.device_threads.append(thread)
         for devicethread in self.device_threads:
             devicethread.start()
-        while (not(self.stopParallelization_Flag)):
-            time.sleep(1)
-            pass
-        print(f"\nTerminated Cluster Parallelization {self.clusterobj.getId()} ")
+        for devicethread in self.device_threads:
+            devicethread.join()
+        # while (not(self.stopParallelization_Flag)):
+        #     time.sleep(0.1)
+        print(f"\n[TERMINATED] Cluster Parallelization {self.clusterobj.getId()}")
 
 
     def stopParallelization(self):
