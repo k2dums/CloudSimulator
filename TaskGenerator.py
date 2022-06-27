@@ -26,7 +26,7 @@ class TaskGenerator:
         
         """
         tasks=[]
-        prob=[0,1,2,2,2,1,1]
+        prob=[0,1,2,1,2,0,1,1]
         for i in range(task_no):
             random_no=random.randint(0,len(prob)-1)
             random_no=prob[random_no]
