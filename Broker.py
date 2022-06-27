@@ -10,6 +10,7 @@ from ChromosomeCopy import ChromosomeCopy
 from threading import Thread
 import time
 import Graph
+import LogFile
 class Broker:
     """
     Class that tracks the network\n
@@ -68,18 +69,25 @@ class Broker:
         self.__deviceId+=1
         return temp
     
+    def assignTasktoDevice(self,device,task):
+       """Assigns task to the device , takes device instance and task instance as parameter"""
+       assert isinstance(device,DeviceNode) 
+       assert isinstance(task,Task)
+       device.setResourceList(task)
+
     
     def assignLinearResources(self,device)->None:
         """
         This function is responsible for assigning work to the instance\n
         of DeviceNode,Station,Mobile the task is assigned sequentially
         """
+    
         if self.isResourceEmpty():
             return 
         assert isinstance(device,DeviceNode)
         device.setResourceList(self.__resourceList[self.__seq_pointer])
         self.__allocatedTask.append(self.__resourceList[self.__seq_pointer])
-        print(f"\nAllocating task {self.__resourceList[self.__seq_pointer]} to device {device.getDeviceId()}")
+        print(f"\nAllocating task {self.__resourceList[self.__seq_pointer]} to device {device.getDeviceId()}\n")
         self.__seq_pointer+=1
     
     def assignResourcesChromosome(self,chromosome:Chromosome) ->None:
@@ -101,14 +109,8 @@ class Broker:
                         device=cluster.getDevices()[unitNo]
                         assert isinstance(device,DeviceNode)
                         device.setResourceList(task)
-                        # print(f'allocating {task} to {device}')
+                       
                         
-        # for clusterno,cluster in enumerate(chromosome):
-        #     for deviceno,device in enumerate(cluster):
-        #         if device ==1:
-        #             obj=self.__network.getNetworkLayers()[0].getClusters[clusterno].getDevices[deviceno]
-        #             self.assignLinearResources(obj)
-
 
     def updateSeqPointer(self,value):
         """Pointer responsible for keeping track of allocated jobs"""
@@ -250,7 +252,7 @@ class Broker:
         self.__resourceList.extend(tasks)
  
 
-    def resourceAllocationAlgorithmStatic(self,algorithm=1):
+    def __resourceAllocationAlgorithm(self,algorithm=1):
         """Allocates the task based on the Algorithm\n
            if the allocation technique is dynamic,a thread needs to be associated while allocating\n
         """
@@ -292,34 +294,6 @@ class Broker:
     
     def loadbalancing():
          pass
-  
-    
-    def startStaticSimulation(self):
-        """Starts the simulation and calculates the time using arithmetic of job/processing_power\n
-           This simulation doesn't use any threading and parellization \n
-        """
-        network=self.__network
-        assert isinstance(network,Network)
-        layer0=network.getNetworkLayers()[0]
-        assert isinstance(layer0,Layer)
-        clusterTimeList=[]
-        for cluster in layer0.getClusters():
-            deviceTimeList=[]
-            assert isinstance(cluster,Cluster)
-            for device in cluster.getDevices():
-                assert isinstance(device,DeviceNode)
-                time=0
-                for task in device.getResourceList():
-                    assert isinstance(task,Task)
-                    job=task.getInstructionLength()
-                    time+=(job/device.getProcessingPower())
-                deviceTimeList.append(time)
-            maximum=max(deviceTimeList)
-            clusterTimeList.append(maximum)
-        return max(clusterTimeList)
-
-                
-
 
     def resetTaskAllocated(self):
         """
@@ -381,7 +355,7 @@ class Broker:
         return self.__resourceList
         
 
-    def getDeviceStatusinfo(self,network,t=0.3,flag=False):
+    def getDeviceStatusinfo(self,network,t=0.1,flag=False):
        """ 
        Used with multithreading\n
        Function gets the Device Status info\n
@@ -405,44 +379,79 @@ class Broker:
             print("\n")
             time.sleep(t)
 
+    def __staticSimulation(self):
+        """Simulation calculates the time using arithmetic of job/processing_power\n
+           This simulation doesn't use any threading and parellization \n
+        """
+     
+        network=self.__network
+        assert isinstance(network,Network)
+        layer0=network.getNetworkLayers()[0]
+        assert isinstance(layer0,Layer)
+        clusterTimeList=[]
+        for cluster in layer0.getClusters():
+            deviceTimeList=[]
+            assert isinstance(cluster,Cluster)
+            for device in cluster.getDevices():
+                assert isinstance(device,DeviceNode)
+                time=0
+                for task in device.getResourceList():
+                    assert isinstance(task,Task)
+                    job=task.getInstructionLength()
+                    time+=(job/device.getProcessingPower())
+                deviceTimeList.append(time)
+            maximum=max(deviceTimeList)
+            clusterTimeList.append(maximum)
+        return max(clusterTimeList)
+
+
     def check_Update_Parallelization(self,clusterParallelObjects,isResrouceEmpty):
         """
         Takes  list of ClusterParallelObject (ClusterParallelObjects) as a parameter\n 
         if there is no task in a clusterParallelObject, it stops the \n
         the parallelizaiton of that clusterParallelObject\n
         """
+    
         while(True):
-            # print("\nCheckupdate",isResrouceEmpty())
+            #if resource is not empty , check after a while
             if not(isResrouceEmpty()):
-                time.sleep(2)
+                time.sleep(0.1)
                 continue
+            #list having cluster object and if it has task
             clusterPobj_Status=[[obj,obj.taskCheck()]  for obj in clusterParallelObjects]
+            #list of booleans representing it there is task or not
             lister=[item[1] for item in clusterPobj_Status]
-            # print(clusterPobj_Status)
+            #Based on the status of the clusterObject , it stop the clusterParallelization
             for items in clusterPobj_Status:
                 clustertemp=items[0]
                 assert isinstance(clustertemp,ClusterParallelization)
                 if items[1]==False:
                     clustertemp.stopParallelization()
+            #if no clusterParellelObject has task it breaks the loop 
+            #if the algorithm is dynamic algorithm flag the algorithm
             if not(any(lister)):
-                 break
-            time.sleep(2)
-
-        if self.__algorithm==Algorithm._DynamicAlgorithm:
-            if hasattr(self.__algo,"stopDynamicAlgorithm"):
-                self.__algo.stopDynamicAlgorithm=True
-                print("stopping dynamic Algorithm ")
-        print("Cluster Status Update is terminated")
-
-
+                if self.__algorithm==Algorithm._DynamicAlgorithm:
+                    if hasattr(self.__algo,"stopDynamicAlgorithm"):
+                        self.__algo.stopDynamicAlgorithm=True
+                break
+            #Now check status after a while 
+            time.sleep(0.1)
+      
+        # print("Cluster Status Update is terminated\n")
 
 
-    def startSimulation(self,result):
+
+
+    def __startClusterParallelization(self):
         """
-        Starts the simulation based on cluster Parallelizaion\n
-        it appends the results of the time taken by the simulation\n
+        Starts the  cluster Parallelizaion\n
+        Function creates Parallelization based on threads and an extra thread to track cluster threads\n
+        Clusters run parallely using threads, concurrent execution of the cluster\n
+        Cluster Parallelizaiton is a class which allows device parallelziation in a cluster\n
+        as the devices in the cluster needs to run concurrently, for proper simulation\n
+        Is limited by the device specification as a big network will create lot of \n
+        threads for the simulation of the network\n
         """
-        print("[STARTING] Simulation")
         clusterThreads=[]
         clusterParallelobj=[]
         network=self.__network
@@ -465,92 +474,53 @@ class Broker:
 
         #Here we add another thread to check if the broker has task 
         #if so we allocate the task using a given allocatino algorithm
-
-        #we add another thread to take dynamic input 
-        #like keep adding task 
         t1=Thread(target=self.check_Update_Parallelization,args=(clusterParallelobj,self.isResourceEmpty))
-        timestart=time.perf_counter()
+        #Starting all the threads ie. ClusterParallelization thread and checkUpdate_Parallelization thread
         for thread in clusterThreads:
             thread.start()
         t1.start()
         for thread in clusterThreads:
             thread.join()
         t1.join()
-        timeend=time.perf_counter()
-        result.append((timeend-timestart))
-       
-        
-        print("\n[TERMINATING] Simulation")
-
-
-
-    def startDynamicSimuation(self):
-        """
-        This function creates Parallelization based on threads\n
-        Clusters run parallely using threads, concurrent execution of the cluster\n
-        Cluster Parallelizaiton is a class which allows device parallelziation in a cluster\n
-        as the devices in the cluster needs to run concurrently, for proper simulation\n
-        This is limited by the device specification as a big network will create lot of \n
-        threads for the simulation of the network\n
-        """
-        print("[STARTING] Dynamic Simulation")
-        clusterThreads=[]
-        clusterParallelobj=[]
-        network=self.__network
-        assert isinstance(network,Network)
-        layer0=network.getNetworkLayers()[0]
-        assert isinstance(layer0,Layer)
-        clusters=layer0.getClusters()
-        #Creating ClusterParallelization object
-        for cluster in clusters:
-            cluster_Pobj=ClusterParallelization(cluster)
-            clusterParallelobj.append(cluster_Pobj)
-        #Assigning each clusterParallelization object to a thread, allows each cluster
-        #to have concurrent execution
-        for cluster in clusterParallelobj:
-            assert isinstance(cluster,ClusterParallelization)
-            thread=Thread(target=cluster.clusterParallelization)
-            clusterThreads.append(thread)
-
-        #Here we add another thread to check if the broker has task 
-        #if so we allocate the task using a given allocatino algorithm
-
-        #we add another thread to take dynamic input 
-        #like keep adding task 
-
-        
-        for thread in clusterThreads:
-            thread.start()
-        for thread in clusterThreads:
-            thread.join()
-      
-
-                
-            
-
     
-            
+    # def __simulate(self,algorithm):
+    #     """A container to start the clusterParallelzation and resource allocation thread"""
+    #     t1=Thread(target=self.__startClusterParallelization)
+    #     allocation=Thread(target=self.__resourceAllocationAlgorithm,args=(algorithm,))
+    #     # [FEATURE]]we add another thread to take dynamic input 
+    #     #like keep adding task 
+    #     t1.start()
+    #     allocation.start()
+    #     t1.join()
+    #     allocation.join()
+
+    def startStaticSimulation(self,algorithm):
+        """Starts static simulation based on artithmetic calculation\n
+           return the time taken, no threads used for the simulation\n
+        """
+        self.__resourceAllocationAlgorithm(algorithm)
+        return self.__staticSimulation()
+    
+    def startSimulation(self,algorithm):
+        """Starts the simulation , takes algorithm as an input.\n       
+           Returns time taken for simulation\n
+           Simulation uses threads for the execution of tasks"""
+       
+        print("[Starting] Simulation")
+        timeStart=time.perf_counter()
+        t1=Thread(target=self.__startClusterParallelization)
+        allocation=Thread(target=self.__resourceAllocationAlgorithm,args=(algorithm,))
+        # [FEATURE]]we add another thread to take dynamic input 
+        #like keep adding task 
+        t1.start()
+        allocation.start()
+        t1.join()
+        allocation.join()
+        timeEnd=time.perf_counter()
+        print("[ENDING] Simulation")
+        return (timeEnd-timeStart)
+     
       
-
-
-  
- 
-          
-          
-
-            
-        
-
-
-
-
-        
-
-
-        
-              
-            
-            
 
 
 
@@ -616,6 +586,7 @@ class Algorithm:
            Allocation based on the serial no starting from the first to last \n
            and then iterates again , until the all the task are allocated\n
         """
+     
         print("Allocating using Round Robin")
         network=self.__network
         assert isinstance(network,Network)  
@@ -641,7 +612,7 @@ class Algorithm:
                         if isdeviceFound:
                             broker.assignLinearResources(device)
                             self.__roundRobinPointer=device
-                        if not(isdeviceFound) and  device== self.__roundRobinPointer:
+                        elif not(isdeviceFound) and  device== self.__roundRobinPointer:
                             isdeviceFound=True
                         if broker.isResourceEmpty():
                             return
@@ -673,6 +644,7 @@ class Algorithm:
            Ex:  cluster 1 weight=1 ,cluster2  weight=2\n
                 cluster task is allocated twice the task to cluster 1\n
         """
+     
         print("Allocation using Weighted Round Robin")
         network=self.__network
         broker=self.__broker
@@ -815,6 +787,7 @@ class Algorithm:
            
            takes generation limit and lot size as parameter\n
         """
+    
         print("Allocation using Genetic Algorithm ")
         broker=self.__broker
         assert isinstance(broker,Broker)
@@ -898,7 +871,7 @@ class Algorithm:
                 assert isinstance(chromosome,Chromosome)
                 tempbroker.resetTaskAllocated()
                 tempbroker.assignResourcesChromosome(chromosome)
-                time=tempbroker.startStaticSimulation()
+                time=tempbroker._Broker__staticSimulation()
                 chromosome.setTime(time)
 
 
@@ -1141,17 +1114,16 @@ class Algorithm:
         return device_is
             
 
-    def dynamicAlgorithm(self,brokerSleep=5):
+    def dynamicAlgorithm(self,brokerSleep=0.1):
         """
         Algorithm initially allocates a task to the first available device(based on the highest processing power available)\n
         When all the devices are occupied , it then checks for the first available device after completing the task.\n
         If free is allocated with another task\n
         """
+
         print("Allocating using Dynamic Algorithm")
         broker=self.__broker
         assert isinstance(broker,Broker)
-        clusterThreads=[]
-        clusterParallelobj=[]
         network=self.__network
         assert isinstance(network,Network)
         layer0=network.getNetworkLayers()[0]
@@ -1168,13 +1140,11 @@ class Algorithm:
                         deviceis=self.getHighestProcessingPower(nonactive)
                     if not(deviceis ==None):
                         broker.assignLinearResources(deviceis)
-                   
-                print(f"Broker has no task list , Sleeping for {brokerSleep}")
+                # print(f"Broker has no task list , Sleeping for {brokerSleep}")
+                #if  broker has no task, check after a while
                 time.sleep(brokerSleep)
-            
         allocate()
-
-
+        print("\n[STOPPING]dynamic Algorithm")
 
     def getAlgorithm(self):
         """
@@ -1202,7 +1172,7 @@ def getTaskleft(cluster):
             print("\nStopped getting Task left info")
             break
 
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 
 
@@ -1238,7 +1208,7 @@ if __name__=="__main__":
     broker=Broker(network)
     tasks=TaskGenerator.generatenoTask(20)
     broker.setResourceList(tasks)
-    broker.resourceAllocationAlgorithmStatic(Algorithm._WeightedRoundRobin)
+    broker.__resourceAllocationAlgorithm(Algorithm._WeightedRoundRobin)
     broker.allDeviceStateSummary()
     input('Press Enter to start')
     #Creating ClusterParallelization object
